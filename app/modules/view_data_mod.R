@@ -17,9 +17,16 @@ dataDisplayServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$data_display <- DT::renderDataTable({
-      r$df
-    })
+    output$data_display <- DT::renderDataTable(
+      DT::datatable(
+        r$df,
+        filter = "top",
+        extensions = "Buttons",
+        options = list(
+          buttons = c("copy", "csv", "excel", "pdf")
+        )
+      )
+    )
     
     
   })
