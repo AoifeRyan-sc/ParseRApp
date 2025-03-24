@@ -1,7 +1,7 @@
 dataDisplayUi <- function(id){
   ns <- shiny::NS(id)
   shiny::tagList(
-    DT::dataTableOutput(ns("data_display"))  
+    shiny::plotOutput(ns("bigram_viz"))
   )
 }
 
@@ -9,8 +9,12 @@ dataDisplayServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$data_display <- DT::renderDataTable({
-      r$df
+    observeEvent(r$text_var, {
+      ParseR::count_ngram(r$df, r$text_var, top)
+    })
+    
+    output$bigram_viz <- shiny::renderPlot({
+      
     })
     
     
