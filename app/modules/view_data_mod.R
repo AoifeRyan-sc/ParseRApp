@@ -1,7 +1,15 @@
 dataDisplayUi <- function(id){
   ns <- shiny::NS(id)
-  shiny::tagList(
-    DT::dataTableOutput(ns("data_display"))  
+  bslib::card(
+    bslib::card_header("Uploaded Data"),
+    bslib::card_body(
+      DT::dataTableOutput(ns("data_display"))
+    ),
+    full_screen = TRUE,
+    style = bslib::css(
+      gap ="0.25rem",
+      resize = "horizontal"
+    )
   )
 }
 

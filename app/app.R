@@ -18,6 +18,7 @@ options(shiny.host = "127.0.0.1")
 # source(here("app/www/x_logo.png"))
 source(here("app/modules/data_upload_mod.R"))
 source(here("app/modules/view_data_mod.R"))
+source(here("app/modules/bigrams_mod.R"))
 
 # Source App Files
 source(here("app/ui.R"))
