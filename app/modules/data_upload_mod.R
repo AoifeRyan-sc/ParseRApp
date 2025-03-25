@@ -8,19 +8,24 @@ dataUploadUi <- function(id){
     # ),
     shiny::fileInput(ns("file_upload"), "Upload File", multiple = FALSE), # add some widgets? 
     shiny::conditionalPanel(
-      condition = "ouput.file_uploaded", ns = ns,
-      shiny::selectizeInput(
-        ns("text_column"), "Text Column:", choices = list(),
-        options = list(
-          placeholder = 'Please select an option below',
-          onInitialize = I('function() { this.setValue(""); }')
-        )),
-      shiny::selectizeInput(
-        ns("url_column"), "URL Column:", choices = list(),
-        options = list(
-          placeholder = 'Please select an option below',
-          onInitialize = I('function() { this.setValue(""); }')
-        ))
+      condition = "output.file_uploaded == 1", ns = ns,
+      bslib::accordion(
+        bslib::accordion_panel(
+          "Column Settings", icon = bsicons::bs_icon("share-fill"), open = TRUE,
+          shiny::selectizeInput(
+            ns("text_column"), "Text Column:", choices = list(),
+            options = list(
+              placeholder = 'Please select an option below',
+              onInitialize = I('function() { this.setValue(""); }')
+            )),
+          shiny::selectizeInput(
+            ns("url_column"), "URL Column:", choices = list(),
+            options = list(
+              placeholder = 'Please select an option below',
+              onInitialize = I('function() { this.setValue(""); }')
+            ))
+        )
+      ),
     ),
     shiny::conditionalPanel(
       condition = "input.text_column", ns = ns,
@@ -34,18 +39,7 @@ dataUploadServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # shiny::observe({
-    #   message("testing: ", input$testing)
-    #   r$testing <- input$testing
-    #   message("testing r: ", r$testing)
-    #   
-    #   message("min_freq: ", input$bigram_min_freq)
-    #   r$bigram_min_freq <- input$bigram_min_freq
-    #   message("min_freq r: ", r$bigram_min_freq)
-    # })
-    
     shiny::observe({
-
       ext <- tools::file_ext(input$file_upload$datapath)
       
       req(ext)
@@ -55,6 +49,8 @@ dataUploadServer <- function(id, r){
                      csv = read.csv(input$file_upload$datapath),
                      xlsx = readxl::read_xlsx(input$file_upload$datapath),
                      rds = readRDS(input$file_upload$datapath))
+      
+      browser()
     })
     
     output$file_uploaded <- shiny::reactive({
