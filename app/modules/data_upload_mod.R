@@ -49,15 +49,15 @@ dataUploadServer <- function(id, r){
                      rds = readRDS(input$file_upload$datapath))
     })
     
-    shiny::observeEvent(input$file_upload, {
-      message("sapplying")
-      col_factor <- sapply(r$df, detect_factor)
-      message("mapplying")
-      df_mat <- mapply(convert_to_factor, r$df, col_factor, SIMPLIFY = F)
-      r$df <- as.data.frame(df_mat)
-      message("finished")
-    })
-    
+    # shiny::observeEvent(input$file_upload, {
+    #   message("sapplying")
+    #   col_factor <- sapply(r$df, detect_factor)
+    #   message("mapplying")
+    #   df_mat <- mapply(convert_to_factor, r$df, col_factor, SIMPLIFY = F)
+    #   r$df <- as.data.frame(df_mat)
+    #   message("finished")
+    # })
+    # 
     output$file_uploaded <- shiny::reactive({
       return(!is.null(r$df))
       # return(is.null(r$df)) # need to remove this - just so I don't have to keep uploading

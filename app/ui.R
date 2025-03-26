@@ -22,55 +22,6 @@ card3 <- bslib::card(
   min_height = 500
 )
 
-# ui <- bslib::page_sidebar(
-#   theme = bslib::bs_theme(
-#     bootswatch = "sandstone"
-#   ),
-#   sidebar = bslib::sidebar(
-#     dataUploadUi("data_upload_panel"),
-#     open = TRUE
-#   ),
-#   bslib::layout_column_wrap(
-#     width = 1,
-#     fill = F,
-#     # First row: Full-width card
-#     bslib::card(
-#       full_width = TRUE,
-#       # Card content here
-#       "Full Width Card"
-#     ),
-#     
-#     # Second row: Two cards
-#     bslib::layout_columns(
-#       width = 1/2,
-#       bslib::card(
-#         # Card 1 content
-#         "Card 1",
-#         min_height = 500,
-#       ),
-#       bslib::card(
-#         # Card 2 content
-#         "Card 2",
-#         min_height = 500,
-#       )
-#     ),
-#     
-#     # Third row: Two cards
-#     bslib::layout_columns(
-#       width = 1/2,
-#       bslib::card(
-#         # Card 3 content
-#         "Card 3",
-#         min_height = 500,
-#       ),
-#       bslib::card(
-#         # Card 4 content
-#         "Card 4",
-#         min_height = 500,
-#       )
-#     )
-#   )
-# )
 ui <- bslib::page_sidebar(
   tags$style(HTML("g.hovertext > path {opacity: .8;}")),
 
@@ -83,12 +34,13 @@ ui <- bslib::page_sidebar(
   bslib::layout_column_wrap(
     width = 1,
     fill = F,
+    heights_equal = "row",
     dataDisplayUi("data_display_card"),
     bslib::layout_column_wrap(
       width = 1/2,
       heights_equal = "row",
-      # dataBigramUi("bigram_card"),
-      card3, card3
+      dataBigramUi("bigram_card"),
+      card3
     ),
     bslib::layout_column_wrap(
       width = 1/2,

@@ -9,7 +9,8 @@ dataDisplayUi <- function(id){
     style = bslib::css(
       gap ="0.25rem",
       resize = "vertical"
-    )
+    ),
+    height = "50px"
   )
 }
 

@@ -21,20 +21,25 @@ dataBigramServer <- function(id, r){
     observeEvent(r$text_var, {
       req(r$text_var)
       message("calculating ngrams")
-      r$bigram <- r$df %>% 
-        ParseR::count_ngram(
-          # text_var = r$text_var,
-          text_var = Message,
-          top_n = r$bigram_top_n,
-          # min_freq = r$bigram_min_freq,
-          min_freq = 10,
-          remove_stops = F, # will set to true later, this is for iteration speed
-          clean_text = F, # will set to true later, this is for iteration speed
-          hashtags = F, # will set to true later, this is for iteration speed
-          mentions = F, # will set to true later, this is for iteration speed
-          distinct = F, # will set to true later, this is for iteration speed
-        )
-      print(names(r$bigram))
+      print(r$text_var)
+      r$bigram <- ParseR::count_ngram(
+        r$df,
+        # "Message"
+        # as.name(r$text_var)
+        !!rlang::sym(r$text_var)
+      )
+      # r$bigram <- ParseR::count_ngram(
+      #   df = r$df,
+      #   text_var = r$text_var
+        # top_n = r$bigram_top_n,
+        # min_freq = r$bigram_min_freq,
+        # remove_stops = FALSE, # will set to true later, this is for iteration speed
+        # clean_text = FALSE, # will set to true later, this is for iteration speed
+        # hashtags = FALSE, # will set to true later, this is for iteration speed
+        # mentions = FALSE, # will set to true later, this is for iteration speed
+        # distinct = FALSE # will set to true later, this is for iteration speed
+      # )
+      # print(names(r$bigram))
     })
     
     output$bigram_viz <- shiny::renderPlot({

@@ -1,9 +1,9 @@
 server <- function(input, output, session) {
   r <- shiny::reactiveValues()
   
-  observeEvent(input$toggle, {
-    session$sendCustomMessage("toggle-card", "mycard")
-  })
+  # observeEvent(input$toggle, {
+  #   session$sendCustomMessage("toggle-card", "")
+  # })
   
   dataUploadServer("data_upload_panel", r)
   dataDisplayServer("data_display_card", r)
