@@ -21,19 +21,19 @@ card3 <- bslib::card(
   )
 )
 
-ui <- bslib::page_fluid(
+ui <- bslib::page_sidebar(
   tags$style(HTML("g.hovertext > path {opacity: .8;}")),
-
+  
   theme = bslib::bs_theme(
     bootswatch = "sandstone",
     # heading_font = bslib::font_face(family = "Cinzel-SemiBold",
     #                                 src = "fonts/Cinzel-SemiBold.ttf"),
     # base_font = bslib::font_face(family = "Cinzel-Regular",
     # src = "fonts/Cinzel-Regular.ttf")
-  ), # maybe should change this
-
-  bslib::layout_sidebar(
-    sidebar = bslib::sidebar(
+  ),
+  
+  # bslib::layout_sidebar(
+  sidebar = bslib::sidebar(
     dataUploadUi("data_upload_panel"),
     open = TRUE),
   bslib::layout_column_wrap(
@@ -54,5 +54,5 @@ ui <- bslib::page_fluid(
       card3, card3
     ),
   )
-  )
+  # )
 )
