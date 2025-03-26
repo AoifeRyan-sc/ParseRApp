@@ -6,10 +6,11 @@ dataBigramUi <- function(id){
       shiny::plotOutput(ns("bigram_viz"))
     ),
     full_screen = TRUE,
-    style = bslib::css(
-      gap ="0.25rem",
-      resize = "vertical"
-    )
+    # style = bslib::css(
+    #   gap ="0.25rem",
+    #   resize = "vertical"
+    # ),
+    min_height = 500
   )
 }
 
