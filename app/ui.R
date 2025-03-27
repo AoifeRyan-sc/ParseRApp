@@ -45,7 +45,8 @@ ui <- bslib::page_sidebar(
     bslib::layout_column_wrap(
       width = 1/2,
       heights_equal = "row",
-      card3, card3
+      groupTermsUi("gt_card"), 
+      card3
     ),
   )
 )

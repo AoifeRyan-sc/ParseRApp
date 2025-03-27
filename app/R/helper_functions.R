@@ -1,3 +1,4 @@
+# tooltip layouts ----
 select_input_with_tooltip <- function(id, title, icon_info, multiple_selections = FALSE){
 
   shiny::div(
@@ -34,6 +35,21 @@ numeric_input_with_tooltip <- function(id, title, default_value, icon_info){
   )
 }
 
+text_input_with_tooltip <- function(id, title, default_value, icon_info){
+  
+  shiny::div(
+    style = "position: relative",
+    shiny::textInput(id, title, placeholder = "hispanic"),
+    shiny::div(
+      style = "position: absolute; top: 0; right: 5px;",
+      bslib::tooltip(
+        bsicons::bs_icon("question-circle-fill"),
+        icon_info
+      )
+    )
+  )
+}
+
 dropdownButton_with_tooltip <- function(..., dropdown_title, icon_info){
   shiny::div(
     style = "position: absolute; top: 3px; right: 15px;",
@@ -57,7 +73,7 @@ dropdownButton_with_tooltip <- function(..., dropdown_title, icon_info){
   )
 }
 
-# not sure if this is important enough to actually do
+# Text processing ----
 detect_factor <- function(x, threshold = 0.1) {
   if (is.numeric(x)) {
     return(FALSE)

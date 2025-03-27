@@ -37,7 +37,8 @@ dataBigramServer <- function(id, r){
       
       r$bigram <- ParseR::count_ngram(
         df = r$df,
-        text_var = !!rlang::sym(r$text_var),
+        # text_var = !!rlang::sym(r$text_var),
+        text_var = clean_text,
         top_n = r$bigram_top_n,
         min_freq = r$bigram_min_freq,
         remove_stops = FALSE, # will set to true later, this is for iteration speed

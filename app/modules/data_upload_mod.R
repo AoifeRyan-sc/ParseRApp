@@ -9,9 +9,9 @@ dataUploadUi <- function(id){
     bslib::accordion(
       bslib::accordion_panel(
         "Upload File",
-        shiny::fileInput(ns("file_upload"), NULL , multiple = FALSE), # add some widgets?  
+        shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE), # add some widgets?  
       ),
-    shiny::conditionalPanel(
+    shiny::conditionalPanel( # should try as a renderUi to se if that lets accordion open
       condition = "output.file_uploaded == 1", ns = ns,
       bslib::accordion_panel(
         "Column Settings", icon = bsicons::bs_icon("file-earmark-spreadsheet"), open = TRUE,
@@ -38,7 +38,24 @@ dataUploadServer <- function(id, r){
                      csv = read.csv(input$file_upload$datapath),
                      xlsx = readxl::read_xlsx(input$file_upload$datapath),
                      rds = readRDS(input$file_upload$datapath))
+      
+      if (nrow(r$df) > 40000){
+        r$df <- NULL
+        shiny::showNotification("File must have less than 50k rows.",
+                                type = "warning",
+                                duration = 10)
+      }
     })
+    
+    observe({ 
+      type_txt <- ifelse(input$type == "default", "notification", input$type)
+      showNotification( 
+        paste("This", type_txt, "will disappear after 2 seconds."), 
+        type = input$type, 
+        duration = 2 
+      ) 
+    }) |> 
+      bindEvent(input$show) 
     
     # shiny::observeEvent(input$file_upload, {
     #   message("sapplying")
@@ -62,6 +79,20 @@ dataUploadServer <- function(id, r){
       shiny::updateSelectizeInput(session = session, "display_columns", choices = colnames(r$df), selected = NULL)
     })
     
+    shiny::observe({ # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
+      req(is.character(r$text_var), r$text_var != "")
+      r$df["clean_text"] <- r$df[r$text_var]
+      
+      r$df <- r$df %>%
+        ParseR::clean_text(
+          text_var = clean_text,
+          tolower = T, # should make some of this customisable
+          remove_mentions = T,
+          remove_punctuation = T,
+          remove_digits = T,
+          in_parallel = T # be aware if we are deploying this - does this work with duckdb?
+        )
+    })
     
     shiny::observe({
       req(r$df)
@@ -69,16 +100,6 @@ dataUploadServer <- function(id, r){
       r$display_var <- input$display_columns
       r$url_var <- input$url_column
     })
-    
-    # shiny::observe({
-    #   req(input$bigram_min_freq, input$bigram_top_n)
-    #   r$bigram_min_freq <- input$bigram_min_freq
-    #   r$bigram_top_n <- input$bigram_top_n
-    #   if (!is.null(input$url_column)){
-    #     r$url_column <- input$url_columns
-    #   }
-    #   # print("min freq input: ", input$bigram_min_freq)
-    # })
     
   })
   
