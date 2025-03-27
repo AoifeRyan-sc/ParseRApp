@@ -34,6 +34,29 @@ numeric_input_with_tooltip <- function(id, title, default_value, icon_info){
   )
 }
 
+dropdownButton_with_tooltop <- function(..., dropdown_title, icon_info){
+  shiny::div(
+    style = "position: absolute; top: 3px; right: 15px;",
+    bslib::tooltip(
+      shinyWidgets::dropdownButton(
+        shiny::tags$h3(dropdown_title),
+        circle = TRUE,
+        size = "sm",
+        icon = shiny::icon("gear"),
+        width = "200px",
+        status = "primary",
+        tags$style(HTML("
+          .dropdown-toggle::after {
+            display: none !important;
+          }
+        ")),
+        ...
+      ),
+      icon_info
+    )
+  )
+}
+
 # not sure if this is important enough to actually do
 detect_factor <- function(x, threshold = 0.1) {
   if (is.numeric(x)) {

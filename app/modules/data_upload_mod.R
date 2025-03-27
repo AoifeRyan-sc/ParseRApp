@@ -19,16 +19,7 @@ dataUploadUi <- function(id){
         select_input_with_tooltip(id = ns("url_column"), title = "URL Column", "The name of the column with the post url"),
         select_input_with_tooltip(id = ns("display_columns"), multiple_selections = TRUE, title = "Display Columns", "The columns you want to display in the Uploaded Data table"),
       )
-      ),
-    shiny::conditionalPanel(
-      condition = "input.text_column", ns = ns,
-      numeric_input_with_tooltip(ns("bigram_min_freq"), "Minimum frequency", default_value = 5, 
-                                 icon_info = "The minimum number of times an n-gram must be observed to be included."),
-      numeric_input_with_tooltip(ns("bigram_top_n"), "Number of bigrams:", default_value = 25,
-                                 icon_info = "The number of n-grams to include.")
-      # shiny::numericInput(ns("bigram_min_freq"), "Minimum frequency", value = 5),
-      # shiny::numericInput(ns("bigram_top_n"), "Number of bigrams:", value = 25)
-    )
+      )
   )
   )
 }
@@ -57,7 +48,7 @@ dataUploadServer <- function(id, r){
     #   r$df <- as.data.frame(df_mat)
     #   message("finished")
     # })
-    # 
+
     output$file_uploaded <- shiny::reactive({
       return(!is.null(r$df))
       # return(is.null(r$df)) # need to remove this - just so I don't have to keep uploading
@@ -78,15 +69,15 @@ dataUploadServer <- function(id, r){
       r$display_var <- input$display_columns
     })
     
-    shiny::observe({
-      req(input$bigram_min_freq, input$bigram_top_n)
-      r$bigram_min_freq <- input$bigram_min_freq
-      r$bigram_top_n <- input$bigram_top_n
-      if (!is.null(input$url_column)){
-        r$url_column <- input$url_columns
-      }
-      # print("min freq input: ", input$bigram_min_freq)
-    })
+    # shiny::observe({
+    #   req(input$bigram_min_freq, input$bigram_top_n)
+    #   r$bigram_min_freq <- input$bigram_min_freq
+    #   r$bigram_top_n <- input$bigram_top_n
+    #   if (!is.null(input$url_column)){
+    #     r$url_column <- input$url_columns
+    #   }
+    #   # print("min freq input: ", input$bigram_min_freq)
+    # })
     
   })
   
