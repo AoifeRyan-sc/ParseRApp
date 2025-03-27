@@ -4,7 +4,7 @@ dataBigramUi <- function(id){
     bslib::card_header(
       shiny::HTML("Bigram <i>(select text column to render</i>)")),
     bslib::card_body(
-      dropdownButton_with_tooltop(
+      dropdownButton_with_tooltip(
         numeric_input_with_tooltip(ns("bigram_min_freq"), "Minimum frequency", default_value = 5, 
                                    icon_info = "The minimum number of times an n-gram must be observed to be included."),
         numeric_input_with_tooltip(ns("bigram_top_n"), "Number of bigrams:", default_value = 25,
@@ -17,11 +17,7 @@ dataBigramUi <- function(id){
         )
     ),
     full_screen = TRUE,
-    # style = bslib::css(
-    #   gap ="0.25rem",
-    #   resize = "vertical"
-    # ),
-    min_height = 500
+    min_height = 300
   )
 }
 

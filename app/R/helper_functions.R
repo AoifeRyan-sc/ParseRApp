@@ -34,7 +34,7 @@ numeric_input_with_tooltip <- function(id, title, default_value, icon_info){
   )
 }
 
-dropdownButton_with_tooltop <- function(..., dropdown_title, icon_info){
+dropdownButton_with_tooltip <- function(..., dropdown_title, icon_info){
   shiny::div(
     style = "position: absolute; top: 3px; right: 15px;",
     bslib::tooltip(

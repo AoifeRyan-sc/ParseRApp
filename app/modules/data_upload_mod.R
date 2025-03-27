@@ -67,6 +67,7 @@ dataUploadServer <- function(id, r){
       req(r$df)
       r$text_var <- input$text_column
       r$display_var <- input$display_columns
+      r$url_var <- input$url_column
     })
     
     # shiny::observe({

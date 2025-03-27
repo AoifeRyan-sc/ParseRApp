@@ -10,7 +10,7 @@ dataDisplayUi <- function(id){
       gap ="0.25rem",
       resize = "vertical"
     ),
-    height = "50px"
+    height = "300px"
   )
 }
 
@@ -27,9 +27,15 @@ dataDisplayServer <- function(id, r){
       }
     })
     
-    output$data_display <- DT::renderDataTable(
+    output$data_display <- DT::renderDataTable({
+      message(is.null(r$url_var))
+      message("url var: ", r$url_var)
+      # if (!is.null(r$url_var)){
+      #   message("link clicking")
+      #   r$df <- LimpiaR::limpiar_link_click(r$df, r$url_var)
+      # }
 
-      # DT::datatable(
+      DT::datatable(
       r$df[r$cols],
       filter = "top",
       # extensions = c("Buttons"),
@@ -38,8 +44,8 @@ dataDisplayServer <- function(id, r){
       #   dom = 'Bfrtip',
       #   buttons = c("copy", "csv", "excel", "pdf")
       # )
-      # )
-    )
+      )
+    })
     
     
   })
