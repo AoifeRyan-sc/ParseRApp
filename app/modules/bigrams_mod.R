@@ -2,7 +2,7 @@ dataBigramUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
-      shiny::HTML("Bigram (<i>select text column to render</i>)")),
+      shiny::HTML("Bigram <i>(select text column to render</i>)")),
     bslib::card_body(
       dropdownButton_with_tooltop(
         numeric_input_with_tooltip(ns("bigram_min_freq"), "Minimum frequency", default_value = 5, 
