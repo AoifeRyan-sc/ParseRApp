@@ -2,7 +2,7 @@ groupTermsUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
-      shiny::HTML("Group Terms <i>(select text column to render</i>)")),
+      shiny::HTML("Group Terms <i>(make selections in dropdown to render)</i>")),
     bslib::card_body(
       dropdownButton_with_tooltip(
         select_input_with_tooltip(id = ns("gt_group_column"), title = "Group Column*", "The name of the column with the groups you want to compare."),

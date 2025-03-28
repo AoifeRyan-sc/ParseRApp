@@ -70,7 +70,7 @@ dataUploadServer <- function(id, r){
     }) # logic for conditional panel in ui
     shiny::outputOptions(output, "file_uploaded", suspendWhenHidden = FALSE)
     
-    shiny::observe({
+    shiny::observeEvent(input$file_upload, {
       req(r$df)
       shiny::updateSelectizeInput(session = session, "text_column", choices = colnames(r$df), selected = NULL)
       shiny::updateSelectizeInput(session = session, "url_column", choices = colnames(r$df), selected = NULL)
@@ -79,6 +79,9 @@ dataUploadServer <- function(id, r){
     
     shiny::observeEvent(r$text_var, { # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
       req(is.character(r$text_var), r$text_var != "")
+      
+      shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+      
       message("cleaning text")
       r$df["clean_text"] <- r$df[r$text_var]
       
@@ -91,6 +94,9 @@ dataUploadServer <- function(id, r){
           remove_digits = T,
           in_parallel = T # be aware if we are deploying this - does this work with duckdb?
         )
+      
+      shinybusy::remove_modal_spinner()
+      shiny::showNotification("Text cleaning completed!", type = "message")
     }) # clean text - maybe need to change
     
     shiny::observe({

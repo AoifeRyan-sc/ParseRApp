@@ -2,7 +2,7 @@ wloUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
-      shiny::HTML("Weighted Log Odds <i>(select text column to render</i>)")),
+      shiny::HTML("Weighted Log Odds <i>(make selections in dropdown to render)</i>")),
     bslib::card_body(
       dropdownButton_with_tooltip(
         select_input_with_tooltip(id = ns("wlo_group_column"), title = "Group Column:", 
