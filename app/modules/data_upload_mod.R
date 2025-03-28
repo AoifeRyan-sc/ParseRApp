@@ -9,7 +9,7 @@ dataUploadUi <- function(id){
     bslib::accordion(
       bslib::accordion_panel(
         "Upload File",
-        shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE), # add some widgets?  
+        shiny::uiOutput(ns("file_upload_display"))
       ),
     shiny::conditionalPanel( # should try as a renderUi to se if that lets accordion open
       condition = "output.file_uploaded == 1", ns = ns,
@@ -28,7 +28,11 @@ dataUploadServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    shiny::observe({
+    output$file_upload_display <- renderUI({
+      shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) # add some widgets?  
+    }) # fileInput display
+    
+    shiny::observeEvent(input$file_upload, {
       ext <- tools::file_ext(input$file_upload$datapath)
       
       req(ext)
@@ -39,24 +43,18 @@ dataUploadServer <- function(id, r){
                      xlsx = readxl::read_xlsx(input$file_upload$datapath),
                      rds = readRDS(input$file_upload$datapath))
       
-      if (nrow(r$df) > 40000){
+      if (nrow(r$df) > 50000){
         r$df <- NULL
         shiny::showNotification("File must have less than 50k rows.",
                                 type = "warning",
                                 duration = 10)
+        output$file_upload_display <- renderUI({
+          shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) # add some widgets?  
+        })
       }
-    })
+    }) # deal with uploaded file
     
-    observe({ 
-      type_txt <- ifelse(input$type == "default", "notification", input$type)
-      showNotification( 
-        paste("This", type_txt, "will disappear after 2 seconds."), 
-        type = input$type, 
-        duration = 2 
-      ) 
-    }) |> 
-      bindEvent(input$show) 
-    
+  
     # shiny::observeEvent(input$file_upload, {
     #   message("sapplying")
     #   col_factor <- sapply(r$df, detect_factor)
@@ -69,7 +67,7 @@ dataUploadServer <- function(id, r){
     output$file_uploaded <- shiny::reactive({
       return(!is.null(r$df))
       # return(is.null(r$df)) # need to remove this - just so I don't have to keep uploading
-    })
+    }) # logic for conditional panel in ui
     shiny::outputOptions(output, "file_uploaded", suspendWhenHidden = FALSE)
     
     shiny::observe({
@@ -77,7 +75,7 @@ dataUploadServer <- function(id, r){
       shiny::updateSelectizeInput(session = session, "text_column", choices = colnames(r$df), selected = NULL)
       shiny::updateSelectizeInput(session = session, "url_column", choices = colnames(r$df), selected = NULL)
       shiny::updateSelectizeInput(session = session, "display_columns", choices = colnames(r$df), selected = NULL)
-    })
+    }) # selectInput updates
     
     shiny::observe({ # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
       req(is.character(r$text_var), r$text_var != "")
@@ -92,14 +90,14 @@ dataUploadServer <- function(id, r){
           remove_digits = T,
           in_parallel = T # be aware if we are deploying this - does this work with duckdb?
         )
-    })
+    }) # clean text - maybe need to change
     
     shiny::observe({
       req(r$df)
       r$text_var <- input$text_column
       r$display_var <- input$display_columns
       r$url_var <- input$url_column
-    })
+    }) # set reactive values
     
   })
   
