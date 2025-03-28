@@ -1,4 +1,4 @@
-dataBigramUi <- function(id){
+bigramVizUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
@@ -21,7 +21,7 @@ dataBigramUi <- function(id){
   )
 }
 
-dataBigramServer <- function(id, r){
+bigramVizServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -52,6 +52,20 @@ dataBigramServer <- function(id, r){
       r$bigram %>% purrr::pluck("viz") %>%
         ParseR::viz_ngram()
     })
+    
+    
+  })
+  
+}
+
+bigramDataUi <- function(id){
+  
+}
+
+bigramDataServer <- function(id, r){
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
     
     
   })

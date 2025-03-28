@@ -36,7 +36,7 @@ wloServer <- function(id, r){
     })
     
     output$gt_viz <- shiny::renderPlot({
-      req("clean_text" %in% colnames(r$df), r$wlo_group_var)
+      req("clean_text" %in% colnames(r$df), input$wlo_group_column)
       message("calculating & plotting wlo")
       
       ParseR::calculate_wlos(

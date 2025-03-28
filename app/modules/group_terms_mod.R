@@ -10,6 +10,7 @@ groupTermsUi <- function(id){
                                    icon_info = "The number of terms you want to show per group."),
         text_input_with_tooltip(id = ns("gt_selected_terms"), "Emphasise terms:", 
                                 icon_info = "Any terms you want to stand out in the output chart."),
+        shiny::actionButton(ns("gt_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"
       ), # need to add more parameters here
@@ -31,13 +32,10 @@ groupTermsServer <- function(id, r){
       shiny::updateSelectizeInput(session = session, "gt_group_column", choices = colnames(r$df), selected = NULL)
     })
     
-    output$gt_viz <- shiny::renderPlot({
-      req("clean_text" %in% colnames(r$df), r$gt_group_var)
-      message("group var: ", r$gt_group_var)
-      
+    shiny::observeEvent(input$gt_action, {
       message("calculating & plotting group terms")
       
-      ParseR::viz_group_terms_network(
+      r$gt <- ParseR::viz_group_terms_network(
         data = r$df,
         group_var = !!rlang::sym(input$gt_group_column),
         # text_var = !!rlang::sym(r$text_var),
@@ -50,8 +48,10 @@ groupTermsServer <- function(id, r){
         selected_terms = NULL,
         selected_terms_colour = "pink"
       )
-      # message("group terms plotted")
-
+    })
+    
+    output$gt_viz <- shiny::renderPlot({
+      r$gt
     })
     
     

@@ -43,7 +43,7 @@ ui <- bslib::page_sidebar(
     bslib::layout_column_wrap(
       width = 1/2,
       heights_equal = "row",
-      dataBigramUi("bigram_card"),
+      bigramVizUi("bigram_card"),
       card3
     ),
     bslib::layout_column_wrap(
