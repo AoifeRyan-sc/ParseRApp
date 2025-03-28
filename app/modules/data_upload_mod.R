@@ -77,8 +77,9 @@ dataUploadServer <- function(id, r){
       shiny::updateSelectizeInput(session = session, "display_columns", choices = colnames(r$df), selected = NULL)
     }) # selectInput updates
     
-    shiny::observe({ # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
+    shiny::observeEvent(r$text_var, { # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
       req(is.character(r$text_var), r$text_var != "")
+      message("cleaning text")
       r$df["clean_text"] <- r$df[r$text_var]
       
       r$df <- r$df %>%

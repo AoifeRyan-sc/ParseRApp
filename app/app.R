@@ -20,6 +20,7 @@ source(here("app/modules/data_upload_mod.R"))
 source(here("app/modules/view_data_mod.R"))
 source(here("app/modules/bigrams_mod.R"))
 source(here("app/modules/group_terms_mod.R"))
+source(here("app/modules/wlo_mod.R"))
 
 source(here("app/R/helper_functions.R"))
 

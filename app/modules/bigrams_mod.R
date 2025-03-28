@@ -31,7 +31,7 @@ dataBigramServer <- function(id, r){
     })
     
     output$bigram_viz <- shiny::renderPlot({
-      req(r$text_var)
+      req("clean_text" %in% colnames(r$df))
       
       message("calculating ngrams")
       

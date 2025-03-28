@@ -1,15 +1,24 @@
 # tooltip layouts ----
-select_input_with_tooltip <- function(id, title, icon_info, multiple_selections = FALSE){
-
-  shiny::div(
-    style = "position: relative",
-    shiny::selectizeInput(
-      id, title, choices = list(), 
+select_input_with_tooltip <- function(id, title, icon_info, choice_list = list(), select = NULL, multiple_selections = FALSE){
+  
+  if (is.null(select)){
+    select_widget <- shiny::selectizeInput(
+      id, title, choices = choice_list, 
       multiple = multiple_selections,
       options = list(
         placeholder = 'Please select an option below',
         onInitialize = I('function() { this.setValue(""); }')
-      )),
+      ))
+  } else {
+    select_widget <- shiny::selectizeInput(
+      id, title, choices = choice_list, 
+      multiple = multiple_selections,
+      selected = select)
+  }
+
+  shiny::div(
+    style = "position: relative",
+    select_widget,
     shiny::div(
       style = "position: absolute; top: 0; right: 5px;",
       bslib::tooltip(
@@ -35,11 +44,11 @@ numeric_input_with_tooltip <- function(id, title, default_value, icon_info){
   )
 }
 
-text_input_with_tooltip <- function(id, title, default_value, icon_info){
+text_input_with_tooltip <- function(id, title, icon_info){
   
   shiny::div(
     style = "position: relative",
-    shiny::textInput(id, title, placeholder = "hispanic"),
+    shiny::textInput(id, title, placeholder = "hispanic, heritage"),
     shiny::div(
       style = "position: absolute; top: 0; right: 5px;",
       bslib::tooltip(

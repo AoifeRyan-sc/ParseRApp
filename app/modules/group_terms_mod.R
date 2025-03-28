@@ -7,9 +7,9 @@ groupTermsUi <- function(id){
       dropdownButton_with_tooltip(
         select_input_with_tooltip(id = ns("gt_group_column"), title = "Group Column*", "The name of the column with the groups you want to compare."),
         numeric_input_with_tooltip(ns("gt_n_terms"), "Number of terms:", default_value = 20, 
-                                   icon_info = "The minimum number of times an n-gram must be observed to be included."),
-        text_input_with_tooltip(ns("gt_n_terms"), "Number of terms:", default_value = 20, 
-                                   icon_info = "The minimum number of times an n-gram must be observed to be included."),
+                                   icon_info = "The number of terms you want to show per group."),
+        text_input_with_tooltip(id = ns("gt_selected_terms"), "Emphasise terms:", 
+                                icon_info = "Any terms you want to stand out in the output chart."),
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"
       ), # need to add more parameters here
@@ -27,28 +27,22 @@ groupTermsServer <- function(id, r){
     ns <- session$ns
     
     shiny::observe({
-      r$gt_n_terms <- input$gt_n_terms
-      r$gt_group_var <- input$gt_group_column
-    })
-    
-    shiny::observe({
       shiny::req(r$df)
       shiny::updateSelectizeInput(session = session, "gt_group_column", choices = colnames(r$df), selected = NULL)
     })
     
     output$gt_viz <- shiny::renderPlot({
-      # req(!is.null(r$gt_group_var), r$df)
-      req(r$gt_group_var)
+      req("clean_text" %in% colnames(r$df), r$gt_group_var)
       message("group var: ", r$gt_group_var)
       
       message("calculating & plotting group terms")
       
       ParseR::viz_group_terms_network(
         data = r$df,
-        group_var = !!rlang::sym(r$gt_group_var),
+        group_var = !!rlang::sym(input$gt_group_column),
         # text_var = !!rlang::sym(r$text_var),
         text_var = clean_text,
-        n_terms = r$gt_n_terms,
+        n_terms = input$gt_n_terms,
         text_size = 4,
         with_ties = FALSE, # need to add customisation for all of this
         group_colour_map = NULL,
