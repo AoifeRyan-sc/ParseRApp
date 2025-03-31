@@ -1,7 +1,7 @@
 card2 <- bslib::card(
   bslib::card_header("Bigram"),
   bslib::card_body(
-    dataBigramUi("bigram_panel")
+    bigramDataUi("bigram_panel")
   ),
   # style = bslib::css(
   #   gap ="0.25rem",
@@ -43,8 +43,8 @@ ui <- bslib::page_sidebar(
     bslib::layout_column_wrap(
       width = 1/2,
       heights_equal = "row",
-      bigramVizUi("bigram_card"),
-      card3
+      bigramVizUi("bigram_viz_card"),
+      bigramDataUi("bigram_data_card")
     ),
     bslib::layout_column_wrap(
       width = 1/2,

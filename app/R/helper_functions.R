@@ -103,16 +103,16 @@ convert_to_factor <- function(x, factor){
 # Chart output processing ----
 
 bigram_pairs <- function(bigram_output, df){
-  
+
   bigram_pairs <- paste(bigram_output$word1, bigram_output$word2, sep = " ")
   bigram_df <- purrr::map_dfr(bigram_pairs, function(bigram_pairs) {
-    tmp %>%
-      dplyr::filter(stringr::str_detect(text_clean, stringr::fixed(bigram_pairs, ignore_case = TRUE))) %>%
+    df %>%
+      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(bigram_pairs, ignore_case = TRUE))) %>%
       dplyr::mutate(bigram_pairs = bigram_pairs) %>%
-      dplyr::select(bigram_pairs, Message, text_clean) %>%
+      dplyr::select(bigram_pairs, Message, clean_text) %>%
       dplyr::mutate(bigram_pairs = as.factor(bigram_pairs))
   })
     
   
-  return(result)
+  return(bigram_df)
 }

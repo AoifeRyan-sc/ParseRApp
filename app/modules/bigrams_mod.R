@@ -59,13 +59,43 @@ bigramVizServer <- function(id, r){
 }
 
 bigramDataUi <- function(id){
-  
+  ns <- shiny::NS(id)
+  bslib::card(
+    bslib::card_header("Bigram Data"),
+    bslib::card_body(
+      DT::dataTableOutput(ns("bigram_data_display"))
+    ),
+    full_screen = TRUE,
+    style = bslib::css(
+      gap ="0.25rem",
+      resize = "horizontal"
+    ),
+    min_height = "300px"
+  )
 }
 
 bigramDataServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    shiny::observe({
+      req("clean_text" %in% colnames(r$df))
+      r$bigram_table <- bigram_pairs(r$bigram$view, r$df)
+    })
+    
+    output$bigram_data_display <- DT::renderDataTable({
+     
+      DT::datatable(
+        r$bigram_table,
+        filter = "top",
+        # extensions = c("Buttons"),
+        # options = list(
+        #   select = list(maxOptions = 2000),
+        #   dom = 'Bfrtip',
+        #   buttons = c("copy", "csv", "excel", "pdf")
+        # )
+      )
+    })
     
     
   })

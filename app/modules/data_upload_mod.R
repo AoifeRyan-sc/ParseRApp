@@ -15,7 +15,7 @@ dataUploadUi <- function(id){
       condition = "output.file_uploaded == 1", ns = ns,
       bslib::accordion_panel(
         "Column Settings", icon = bsicons::bs_icon("file-earmark-spreadsheet"), open = TRUE,
-        select_input_with_tooltip(id = ns("text_column"), title = "Text Column*", "The name of the column with the text you want to analyse"),
+        # select_input_with_tooltip(id = ns("text_column"), title = "Text Column*", "The name of the column with the text you want to analyse"),
         select_input_with_tooltip(id = ns("url_column"), title = "URL Column", "The name of the column with the post url"),
         select_input_with_tooltip(id = ns("display_columns"), multiple_selections = TRUE, title = "Display Columns", "The columns you want to display in the Uploaded Data table"),
       )
@@ -52,6 +52,14 @@ dataUploadServer <- function(id, r){
           shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) # add some widgets?  
         })
       }
+      
+      shiny::showModal(shiny::modalDialog(
+        title = "Select a Column",
+        select_input_with_tooltip(id = ns("text_column"), title = "Text Column*", 
+                                  icon_info = "The name of the column with the text you want to analyse",
+                                  choice_list = colnames(r$df)),
+        footer = shiny::actionButton(ns("confirm_text_col"), "Go!")
+      ))
     }) # deal with uploaded file
     
   
@@ -72,13 +80,15 @@ dataUploadServer <- function(id, r){
     
     shiny::observeEvent(input$file_upload, {
       req(r$df)
-      shiny::updateSelectizeInput(session = session, "text_column", choices = colnames(r$df), selected = NULL)
+      # shiny::updateSelectizeInput(session = session, "text_column", choices = colnames(r$df), selected = NULL)
       shiny::updateSelectizeInput(session = session, "url_column", choices = colnames(r$df), selected = NULL)
       shiny::updateSelectizeInput(session = session, "display_columns", choices = colnames(r$df), selected = NULL)
     }) # selectInput updates
     
-    shiny::observeEvent(r$text_var, { # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
-      req(is.character(r$text_var), r$text_var != "")
+    shiny::observeEvent(input$confirm_text_col, { # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
+      # req(is.character(r$text_var), r$text_var != "")
+      shiny::removeModal()
+      print("action")
       
       shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
       
@@ -93,7 +103,9 @@ dataUploadServer <- function(id, r){
           remove_punctuation = T,
           remove_digits = T,
           in_parallel = T # be aware if we are deploying this - does this work with duckdb?
-        )
+        ) 
+      
+      r$df["clean_text"] <- tm::removeWords(r$df$clean_text, tm::stopwords((kind = "SMART")))
       
       shinybusy::remove_modal_spinner()
       shiny::showNotification("Text cleaning completed!", type = "message")
