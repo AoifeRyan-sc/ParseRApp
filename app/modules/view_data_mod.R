@@ -50,15 +50,12 @@ dataDisplayServer <- function(id, r){
     })
     
     output$data_display <- DT::renderDataTable({
-      message("url col: ", r$url_var)
       if (is.null(r$url_var)){
-        print("not link clicking")
         r$df[r$cols] %>%
           DT::datatable(
             filter = "top"
           )
       } else {
-        print("link clicking")
         r$df[r$cols] %>%
           LimpiaR::limpiar_link_click(!!rlang::sym(r$url_var)) %>% 
           DT::datatable(

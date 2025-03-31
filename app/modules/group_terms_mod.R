@@ -35,24 +35,29 @@ groupTermsServer <- function(id, r){
     shiny::observeEvent(input$gt_action, {
       message("calculating & plotting group terms")
       
-      r$gt <- ParseR::viz_group_terms_network(
-        data = r$df,
-        group_var = !!rlang::sym(input$gt_group_column),
-        # text_var = !!rlang::sym(r$text_var),
-        text_var = clean_text,
-        n_terms = input$gt_n_terms,
-        text_size = 4,
-        with_ties = FALSE, # need to add customisation for all of this
-        group_colour_map = NULL,
-        terms_colour = "black",
-        selected_terms = NULL,
-        selected_terms_colour = "pink"
-      )
+      r$gt_selected_terms <- if (is.null(input$gt_selected_terms)){
+        NULL
+      } else {
+        strsplit(input$gt_selected_terms, ",\\s*")[[1]]
+      }
+      
+      output$gt_viz <- shiny::renderPlot({
+        ParseR::viz_group_terms_network(
+          data = r$df,
+          group_var = !!rlang::sym(input$gt_group_column),
+          # text_var = !!rlang::sym(r$text_var),
+          text_var = clean_text,
+          n_terms = input$gt_n_terms,
+          text_size = 4,
+          with_ties = FALSE, # need to add customisation for all of this
+          group_colour_map = NULL,
+          terms_colour = "black",
+          selected_terms = r$gt_selected_terms,
+          selected_terms_colour = "pink"
+        )
+      })
     })
     
-    output$gt_viz <- shiny::renderPlot({
-      r$gt
-    })
     
     
   })
