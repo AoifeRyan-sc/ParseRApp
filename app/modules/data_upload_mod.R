@@ -11,15 +11,12 @@ dataUploadUi <- function(id){
         "Upload File",
         shiny::uiOutput(ns("file_upload_display"))
       ),
-    shiny::conditionalPanel( # should try as a renderUi to se if that lets accordion open
-      condition = "output.file_uploaded == 1", ns = ns,
-      bslib::accordion_panel(
-        "Column Settings", icon = bsicons::bs_icon("file-earmark-spreadsheet"), open = TRUE,
-        # select_input_with_tooltip(id = ns("text_column"), title = "Text Column*", "The name of the column with the text you want to analyse"),
-        select_input_with_tooltip(id = ns("url_column"), title = "URL Column", "The name of the column with the post url"),
-        select_input_with_tooltip(id = ns("display_columns"), multiple_selections = TRUE, title = "Display Columns", "The columns you want to display in the Uploaded Data table"),
-      )
-      )
+    # shiny::conditionalPanel( # should try as a renderUi to se if that lets accordion open
+    #   condition = "output.file_uploaded == 1", ns = ns,
+    #   bslib::accordion_panel(
+    #     "Column Settings", icon = bsicons::bs_icon("file-earmark-spreadsheet"), open = TRUE,
+    #   )
+    #   )
   )
   )
 }
@@ -77,23 +74,14 @@ dataUploadServer <- function(id, r){
       # return(is.null(r$df)) # need to remove this - just so I don't have to keep uploading
     }) # logic for conditional panel in ui
     shiny::outputOptions(output, "file_uploaded", suspendWhenHidden = FALSE)
-    
-    shiny::observeEvent(input$file_upload, {
-      req(r$df)
-      # shiny::updateSelectizeInput(session = session, "text_column", choices = colnames(r$df), selected = NULL)
-      shiny::updateSelectizeInput(session = session, "url_column", choices = colnames(r$df), selected = NULL)
-      shiny::updateSelectizeInput(session = session, "display_columns", choices = colnames(r$df), selected = NULL)
-    }) # selectInput updates
-    
+
     shiny::observeEvent(input$confirm_text_col, { # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
-      # req(is.character(r$text_var), r$text_var != "")
       shiny::removeModal()
-      print("action")
       
       shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
       
       message("cleaning text")
-      r$df["clean_text"] <- r$df[r$text_var]
+      r$df["clean_text"] <- r$df[input$text_column]
       
       r$df <- r$df %>%
         ParseR::clean_text(
@@ -111,12 +99,6 @@ dataUploadServer <- function(id, r){
       shiny::showNotification("Text cleaning completed!", type = "message")
     }) # clean text - maybe need to change
     
-    shiny::observe({
-      req(r$df)
-      r$text_var <- input$text_column
-      r$display_var <- input$display_columns
-      r$url_var <- input$url_column
-    }) # set reactive values
     
   })
   

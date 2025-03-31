@@ -28,10 +28,10 @@ ui <- bslib::page_sidebar(
   theme = bslib::bs_theme(
     bootswatch = "sandstone",
   ),
-  shinybusy::add_busy_gif(
-    src = "https://jeroen.github.io/images/banana.gif",
-    height = 70, width = 70
-  ),
+  # shinybusy::add_busy_gif(
+  #   src = "https://jeroen.github.io/images/banana.gif",
+  #   height = 70, width = 70
+  # ),
   sidebar = bslib::sidebar(
     dataUploadUi("data_upload_panel"),
     open = TRUE),
