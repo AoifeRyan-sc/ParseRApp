@@ -1,13 +1,3 @@
-card2 <- bslib::card(
-  bslib::card_header("Bigram"),
-  bslib::card_body(
-    bigramDataUi("bigram_panel")
-  ),
-  # style = bslib::css(
-  #   gap ="0.25rem",
-  #   resize = "vertical"
-  # )
-)
 card3 <- bslib::card(
   full_screen = TRUE,
   bslib::card_header("Filling content"),
@@ -36,28 +26,32 @@ ui <- bslib::page_sidebar(
     dataUploadUi("data_upload_panel"),
     open = TRUE),
   bslib::layout_column_wrap(
-    width = 1,
-    fill = F,
+    bslib::layout_column_wrap(
+      width = 1/3,
+      !!!valueBoxUi("value_box_panel"),
+    ),
+  width = 1,
+  fill = F,
+  heights_equal = "row",
+  dataDisplayUi("data_display_card"),
+  bslib::layout_column_wrap(
+    width = 1/2,
     heights_equal = "row",
-    dataDisplayUi("data_display_card"),
-    bslib::layout_column_wrap(
-      width = 1/2,
-      heights_equal = "row",
-      bigramVizUi("bigram_viz_card"),
-      bigramDataUi("bigram_data_card")
-    ),
-    bslib::layout_column_wrap(
-      width = 1/2,
-      heights_equal = "row",
-      card3,
-      groupTermsUi("gt_card")
-    ),
-    bslib::layout_column_wrap(
-      width = 1/2,
-      heights_equal = "row",
-      wloUi("wlo_card"),
-      card3
-    ),
+    bigramVizUi("bigram_viz_card"),
+    bigramDataUi("bigram_data_card")
+  ),
+  bslib::layout_column_wrap(
+    width = 1/2,
+    heights_equal = "row",
+    card3,
+    groupTermsUi("gt_card")
+  ),
+  bslib::layout_column_wrap(
+    width = 1/2,
+    heights_equal = "row",
+    wloUi("wlo_card"),
+    card3
+  ),
   )
 )
 

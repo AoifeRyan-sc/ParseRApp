@@ -10,6 +10,8 @@ groupTermsUi <- function(id){
                                    icon_info = "The number of terms you want to show per group."),
         text_input_with_tooltip(id = ns("gt_selected_terms"), "Emphasise terms:", 
                                 icon_info = "Any terms you want to stand out in the output chart."),
+        text_input_with_tooltip(id = ns("gt_emphasis_colour"), "HEX Code:", 
+                                icon_info = "The HEX code for the colour you want to highlight selected terms in. Defaults to "),
         shiny::actionButton(ns("gt_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"

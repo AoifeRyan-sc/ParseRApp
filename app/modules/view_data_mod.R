@@ -41,15 +41,22 @@ dataDisplayServer <- function(id, r){
       } else {
         input$display_columns
       }
-      
+
       r$url_var <- if (input$url_column == ""){
         NULL
       } else {
         input$url_column
       }
+      
+      # r$url_var <- if (is.null(input$url_column) | input$url_column == ""){
+      #   NULL
+      # } else {
+      #   input$url_column
+      # }
     })
     
     output$data_display <- DT::renderDataTable({
+
       if (is.null(r$url_var)){
         r$df[r$cols] %>%
           DT::datatable(
@@ -57,7 +64,7 @@ dataDisplayServer <- function(id, r){
           )
       } else {
         r$df[r$cols] %>%
-          LimpiaR::limpiar_link_click(!!rlang::sym(r$url_var)) %>% 
+          LimpiaR::limpiar_link_click(!!rlang::sym(r$url_var)) %>%
           DT::datatable(
             filter = "top",
             escape = FALSE
@@ -70,7 +77,7 @@ dataDisplayServer <- function(id, r){
           )
       }
     })
-    
+
     
   })
   

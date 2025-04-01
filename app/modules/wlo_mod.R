@@ -42,7 +42,7 @@ wloServer <- function(id, r){
       ParseR::calculate_wlos(
         df = r$df,
         text_var = clean_text,
-        topic_var = input$wlo_group_column,
+        topic_var = !!rlang::sym(input$wlo_group_column),
         top_n = 30,
         filter_by = input$wlo_filter_column,
         top_terms_cutoff = 500,

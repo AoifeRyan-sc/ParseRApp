@@ -55,6 +55,12 @@ dataUploadServer <- function(id, r){
         select_input_with_tooltip(id = ns("text_column"), title = "Text Column*", 
                                   icon_info = "The name of the column with the text you want to analyse",
                                   choice_list = colnames(r$df)),
+        select_input_with_tooltip(id = ns("author_column"), title = "Author Column*", 
+                                  icon_info = "The name of the author column",
+                                  choice_list = colnames(r$df)),
+        select_input_with_tooltip(id = ns("date_column"), title = "Date Column*", 
+                                  icon_info = "The name of the date column",
+                                  choice_list = colnames(r$df)),
         footer = shiny::actionButton(ns("confirm_text_col"), "Go!")
       ))
     }) # deal with uploaded file
@@ -80,19 +86,20 @@ dataUploadServer <- function(id, r){
       
       shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
       
-      message("cleaning text")
       r$df["clean_text"] <- r$df[input$text_column]
+      r$date_var <- input$date_column
+      r$sender_var <- input$author_column
       
-      r$df <- r$df %>%
-        ParseR::clean_text(
-          text_var = clean_text,
-          tolower = T, # should make some of this customisable
-          remove_mentions = T,
-          remove_punctuation = T,
-          remove_digits = T,
-          in_parallel = T # be aware if we are deploying this - does this work with duckdb?
-        ) 
-      
+      # r$df <- r$df %>%
+      #   ParseR::clean_text(
+      #     text_var = clean_text,
+      #     tolower = T, # should make some of this customisable
+      #     remove_mentions = T,
+      #     remove_punctuation = T,
+      #     remove_digits = T,
+      #     in_parallel = T # be aware if we are deploying this - does this work with duckdb?
+      #   ) 
+      # 
       r$df["clean_text"] <- tm::removeWords(r$df$clean_text, tm::stopwords((kind = "SMART")))
       
       shinybusy::remove_modal_spinner()
