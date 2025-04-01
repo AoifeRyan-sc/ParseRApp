@@ -4,21 +4,19 @@ valueBoxUi <- function(id){
       bslib::value_box(
         title = "No. Data Points",
         value = shiny::textOutput(ns("n_rows")),
-        showcase = bsicons::bs_icon("bar-chart"),
+        showcase = bsicons::bs_icon("globe"),
         theme = "purple"
       ),
       bslib::value_box(
         title = "No. Authors",
         value = shiny::textOutput(ns("n_authors")),
-        showcase = bsicons::bs_icon("graph-up"),
+        showcase = bsicons::bs_icon("person-raised-hand"),
         theme = "teal"
       ),
       bslib::value_box(
         title = "No. Weeks",
         value = shiny::textOutput(ns("n_weeks")),
-        # showcase = bsicsons::bs_icon("pie-chart"),
         showcase = plotly::plotlyOutput(ns("vot_chart")),
-        # showcase = vot_plot,
         theme = "pink",
         full_screen = TRUE
       )
@@ -42,10 +40,9 @@ valueBoxServer <- function(id, r){
       length(unique(format(r$time_info, "%Y-%U")))
     })
     output$vot_chart <- plotly::renderPlotly({
-    # shiny::observe({
       req(r$time_info)
       message("plotting chart")
-      week_df <- data.frame(table(r$time_info))
+      week_df <- data.frame(table(format(r$time_info)))
       colnames(week_df) <- c("Week", "Posts")
       print(head(week_df))
       
@@ -69,7 +66,9 @@ valueBoxServer <- function(id, r){
             "function(el) {
       el.closest('.bslib-value-box')
         .addEventListener('bslib.card', function(ev) {
-          Plotly.relayout(el, {'xaxis.visible': ev.detail.fullScreen});
+          Plotly.relayout(el, {
+          'xaxis.visible': ev.detail.fullScreen,
+          'yaxis.visible': ev.detail.fullScreen});
         })
     }"
           )
