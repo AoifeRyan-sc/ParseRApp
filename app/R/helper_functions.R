@@ -116,3 +116,19 @@ bigram_pairs <- function(bigram_output, df){
   
   return(bigram_df)
 }
+
+
+# Personalised functions
+count_ngram_app <- function(df, text_var, top_n, min_freq){
+  ParseR::count_ngram(
+    df = df,
+    text_var = {{text_var}},
+    top_n = top_n,
+    min_freq = min_freq,
+    remove_stops = FALSE, # will set to true later, this is for iteration speed
+    clean_text = FALSE, # will set to true later, this is for iteration speed
+    hashtags = FALSE, # will set to true later, this is for iteration speed
+    mentions = FALSE, # will set to true later, this is for iteration speed
+    distinct = FALSE # will set to true later, this is for iteration speed
+  )
+}

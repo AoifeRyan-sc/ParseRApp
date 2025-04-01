@@ -5,7 +5,8 @@ groupTermsUi <- function(id){
       shiny::HTML("Group Terms <i>(make selections in dropdown to render)</i>")),
     bslib::card_body(
       dropdownButton_with_tooltip(
-        select_input_with_tooltip(id = ns("gt_group_column"), title = "Group Column*", "The name of the column with the groups you want to compare."),
+        select_input_with_tooltip(id = ns("gt_group_column"), title = "Group Column*",
+                                  icon_info = "The name of the column with the groups you want to compare."),
         numeric_input_with_tooltip(ns("gt_n_terms"), "Number of terms:", default_value = 20, 
                                    icon_info = "The number of terms you want to show per group."),
         text_input_with_tooltip(id = ns("gt_selected_terms"), "Emphasise terms:", 
