@@ -21,7 +21,7 @@ bigramVizUi <- function(id){
         )
     ),
     full_screen = TRUE,
-    min_height = 300
+    min_height = "300px"
   )
 }
 
@@ -32,9 +32,11 @@ bigramVizServer <- function(id, r){
     shiny::observe({
       shiny::req(r$df)
       shiny::updateSelectizeInput(session = session, "bigram_group_column", choices = c("No Group Variable" = "none", colnames(r$df)), selected = NULL)
-    })
+    }) # update select input
     
     shiny::observeEvent(input$bigram_action, {
+      
+      r$bigram_go_pressed <- input$bigram_action
       
       if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
         r$bigram <- count_ngram_app(df = r$df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
@@ -46,57 +48,25 @@ bigramVizServer <- function(id, r){
         })
         r$n_bigrams <- length(r$bigram) 
       }
-
-      # legacy ----
-      # output$bigram_viz <- shiny::renderPlot({
-      #   req("clean_text" %in% colnames(r$df))
-      #   
-      #   message("calculating ngrams")
+      
+      output$bigram_card_layout <- shiny::renderUI({
+        req(r$n_bigrams)
         
-        # r$bigram <- ParseR::count_ngram(
-        #   df = r$df,
-        #   # text_var = !!rlang::sym(r$text_var),
-        #   text_var = clean_text,
-        #   top_n = input$bigram_top_n,
-        #   min_freq = input$bigram_min_freq,
-        #   remove_stops = FALSE, # will set to true later, this is for iteration speed
-        #   clean_text = FALSE, # will set to true later, this is for iteration speed
-        #   hashtags = FALSE, # will set to true later, this is for iteration speed
-        #   mentions = FALSE, # will set to true later, this is for iteration speed
-        #   distinct = FALSE # will set to true later, this is for iteration speed
-        # )
-        
-      #   message("plotting")
-      #   r$bigram %>% purrr::pluck("viz") %>%
-      #     ParseR::viz_ngram()
-      # })
-      # ----
-      })
-    
-    output$bigram_card_layout <- shiny::renderUI({
-      req(r$n_bigrams)
+        if (r$n_bigrams > 1){
+          nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
+            bigram_name <- names(r$bigram)[i]
+            bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
+          })
+          
+          bslib::navset_underline(
+            !!!nav_panels
+          )
+        } else {
+          shiny::plotOutput(ns("bigram_group_1"))
+        }
+      }) # ui layout
       
       if (r$n_bigrams > 1){
-        nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
-          bigram_name <- names(r$bigram)[i]
-          bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
-        })
-        
-        bslib::navset_underline(
-          !!!nav_panels
-        )
-      } else {
-        shiny::plotOutput(ns("bigram_group_1"))
-      }
-    })
-    
-    shiny::observe({
-      req(r$bigram)
-
-      if (r$n_bigrams > 1){
-        output$bigram_group_1 <- shiny::renderPlot({
-          ParseR::viz_ngram(r$bigram[[1]]$viz)
-        })
         lapply(seq_along(r$bigram), function(i) {
           output[[paste0("bigram_group_", i)]] <- shiny::renderPlot({
             req(r$bigram[[i]])  # Ensure the plot exists
@@ -105,10 +75,29 @@ bigramVizServer <- function(id, r){
         })
       } else {
         output$bigram_group_1 <- shiny::renderPlot({
-           ParseR::viz_ngram(r$bigram$viz)
+          ParseR::viz_ngram(r$bigram$viz)
         })
       }
-      })
+      }) # create bigram lists
+    
+    
+    
+    # shiny::observe({
+    #   req(r$bigram)
+    # 
+    #   if (r$n_bigrams > 1){
+    #     lapply(seq_along(r$bigram), function(i) {
+    #       output[[paste0("bigram_group_", i)]] <- shiny::renderPlot({
+    #         req(r$bigram[[i]])  # Ensure the plot exists
+    #         ParseR::viz_ngram(r$bigram[[i]]$viz )
+    #       })
+    #     })
+    #   } else {
+    #     output$bigram_group_1 <- shiny::renderPlot({
+    #        ParseR::viz_ngram(r$bigram$viz)
+    #     })
+    #   }
+    #   }) # define plot outputs
     
     })
 }
@@ -118,7 +107,7 @@ bigramDataUi <- function(id){
   bslib::card(
     bslib::card_header("Bigram Data"),
     bslib::card_body(
-      DT::dataTableOutput(ns("bigram_data_display"))
+      shiny::uiOutput(ns("bigram_data_display"))
     ),
     full_screen = TRUE,
     style = bslib::css(
@@ -133,23 +122,70 @@ bigramDataServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    shiny::observe({
-      req("clean_text" %in% colnames(r$df))
-      r$bigram_table <- bigram_pairs(r$bigram$view, r$df)
+    shiny::observeEvent(r$bigram_go_pressed, { #input$bigram_viz_card-bigram_action, {
+      req(r$n_bigrams)
+      
+      message("initiated")
+      
+      if (r$n_bigrams > 1){
+        r$bigram_table <- lapply(seq_along(r$bigram), function(i){
+          bigram_pairs(r$bigram[[i]]$view, r$df)
+        }) 
+        names(r$bigram_table) <- names(r$bigram)
+        message("creation multiple: ", class(r$bigram_table))
+      } else {
+        r$bigram_table <- bigram_pairs(r$bigram$view, r$df) 
+        message("creation one: ", class(r$bigram_table))
+      }
+      
+      output$bigram_data_display <-  shiny::renderUI({
+        req(r$n_bigrams)
+        if (r$n_bigrams > 1){
+          nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
+            bigram_name <- names(r$bigram)[i]
+            bslib::nav_panel(bigram_name, DT::dataTableOutput(ns(paste0("bigram_data_table_", i))))
+          })
+          
+          bslib::navset_underline(
+            !!!nav_panels
+          )
+        } else {
+          DT::dataTableOutput(ns("bigram_data_table"))
+        }
+      })
+      
     })
     
-    output$bigram_data_display <- DT::renderDataTable({
-     
-      DT::datatable(
-        r$bigram_table,
-        filter = "top",
-        # extensions = c("Buttons"),
-        # options = list(
-        #   select = list(maxOptions = 2000),
-        #   dom = 'Bfrtip',
-        #   buttons = c("copy", "csv", "excel", "pdf")
-        # )
-      )
+    shiny::observeEvent(r$bigram_go_pressed, {
+      req(r$bigram_table)
+      if (r$n_bigrams > 1){
+        print("trying more than 1")
+        print(class(r$bigram_table))
+        lapply(seq_along(r$bigram_table), function(i) {
+          output[[paste0("bigram_data_table_", i)]] <- DT::renderDataTable({
+            DT::datatable(
+              df,
+              filter = "top",
+              "pageLength": 5,
+              # extensions = c("Buttons"),
+              # options = list(
+              #   select = list(maxOptions = 2000),
+              #   dom = 'Bfrtip',
+              #   buttons = c("copy", "csv", "excel", "pdf")
+              # )
+            )
+          })
+          # output[[paste0("bigram_data_table_", i)]] <- DT::datatable({
+          #   req(r$bigram_table[[i]])  # Ensure the plot exists
+          #   datatable_display_app(df = r$bigram_table[[i]])
+          # })
+        })
+      } else {
+        print("trying")
+        output$bigram_data_table <- DT::renderDataTable({
+          datatable_display_app(df = r$bigram_table)
+        })
+      }
     })
     
     

@@ -41,10 +41,8 @@ valueBoxServer <- function(id, r){
     })
     output$vot_chart <- plotly::renderPlotly({
       req(r$time_info)
-      message("plotting chart")
       week_df <- data.frame(table(format(r$time_info, "%Y-%U")))
       colnames(week_df) <- c("Week", "Posts")
-      print(head(week_df))
       
       plotly::plot_ly(week_df) %>%
         plotly::add_lines(

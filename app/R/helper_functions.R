@@ -118,7 +118,7 @@ bigram_pairs <- function(bigram_output, df){
 }
 
 
-# Personalised functions
+# Personalised functions ----
 count_ngram_app <- function(df, text_var, top_n, min_freq){
   ParseR::count_ngram(
     df = df,
@@ -130,5 +130,19 @@ count_ngram_app <- function(df, text_var, top_n, min_freq){
     hashtags = FALSE, # will set to true later, this is for iteration speed
     mentions = FALSE, # will set to true later, this is for iteration speed
     distinct = FALSE # will set to true later, this is for iteration speed
+  )
+}
+
+datatable_display_app <- function(df){
+  DT::datatable(
+    df,
+    filter = "top",
+    "pageLength": 5,
+    # extensions = c("Buttons"),
+    # options = list(
+    #   select = list(maxOptions = 2000),
+    #   dom = 'Bfrtip',
+    #   buttons = c("copy", "csv", "excel", "pdf")
+    # )
   )
 }
