@@ -139,10 +139,11 @@ datatable_display_app <- function(df){
     filter = "top",
     # "pageLength": 5,
     # extensions = c("Buttons"),
-    # options = list(
-    #   select = list(maxOptions = 2000),
-    #   dom = 'Bfrtip',
-    #   buttons = c("copy", "csv", "excel", "pdf")
-    # )
+    options = list(
+      select = list(maxOptions = 2000),
+      dom = 'Bfrtip',
+      buttons = c("copy", "csv", "excel", "pdf"),
+      pageLength = 5
+    )
   )
 }
