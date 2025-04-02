@@ -137,7 +137,7 @@ datatable_display_app <- function(df){
   DT::datatable(
     df,
     filter = "top",
-    "pageLength": 5,
+    # "pageLength": 5,
     # extensions = c("Buttons"),
     # options = list(
     #   select = list(maxOptions = 2000),
