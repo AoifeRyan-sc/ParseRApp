@@ -66,7 +66,7 @@ bigramVizServer <- function(id, r){
         })
       } # render ui
   
-      })
+      }) # bigram creation and reactive fiddling
     
     output$bigram_card_layout <- shiny::renderUI({
       req(r$bigram)
@@ -76,14 +76,9 @@ bigramVizServer <- function(id, r){
           bigram_name <- names(r$bigram)[i]
           bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
         })
-        
-        # shinycssloaders::withSpinner(
-          bslib::navset_underline(!!!nav_panels)
-        # ) 
+        bslib::navset_underline(!!!nav_panels)
       } else {
-        # # shinycssloaders::withSpinner(
-          shiny::plotOutput(ns("bigram_group_1"))
-        # )
+        shiny::plotOutput(ns("bigram_group_1"))
       }
     }) # ui layout
     
@@ -95,7 +90,9 @@ bigramDataUi <- function(id){
   bslib::card(
     bslib::card_header("Bigram Data"),
     bslib::card_body(
-      shiny::uiOutput(ns("bigram_data_display"))
+      shinycssloaders::withSpinner(
+        shiny::uiOutput(ns("bigram_data_display")) 
+      )
     ),
     full_screen = TRUE,
     style = bslib::css(
@@ -112,53 +109,48 @@ bigramDataServer <- function(id, r){
     
     shiny::observeEvent(r$bigram_calculated, {
       shiny::req(isTruthy(r$bigram_calculated))
-      message("calced?: ", r$bigram_calculated)
-      message("n_bigrams: ", r$n_bigrams)
-      
+
       if (r$n_bigrams > 1){
+        req(r$bigram)
         r$bigram_table <- lapply(seq_along(r$bigram), function(i){
           bigram_pairs(r$bigram[[i]]$view, r$df)
         })
         names(r$bigram_table) <- names(r$bigram)
-        message("creation multiple: ", class(r$bigram_table))
       } else {
+        req(r$bigram)
         r$bigram_table <- bigram_pairs(r$bigram$view, r$df)
-        message("creation one: ", class(r$bigram_table))
       } # create tables
       
-      output$bigram_data_display <-  shiny::renderUI({
-        message("ui layout deciding")
-        if (r$n_bigrams > 1){
-          message("multiple tables deciding")
-          table_nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
-            table_name <- names(r$bigram)[i]
-            bslib::nav_panel(table_name, DT::dataTableOutput(ns(paste0("bigram_data_table_", i))))
-          })
-          
-          return(bslib::navset_underline(
-            !!!table_nav_panels
-          ))
-        } else {
-          message("one table deciding")
-          return(DT::dataTableOutput(ns("bigram_data_table_1")))
-        }
-      }) # ui layout
-      
       if (r$n_bigrams > 1){
-        message("mutiple tables rendering")
         lapply(seq_along(r$bigram_table), function(i) {
           output[[paste0("bigram_data_table_", i)]] <- DT::renderDataTable({
             datatable_display_app(df = r$bigram_table[[i]])
             })
         })
       } else {
-        message("one table rendering")
         output$bigram_data_table_1 <- DT::renderDataTable({
           datatable_display_app(df = r$bigram_table)
         })
       } # render yu
       
     })
+    
+    output$bigram_data_display <-  shiny::renderUI({
+      req(r$bigram)
+      
+      if (r$n_bigrams > 1){
+        table_nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
+          table_name <- names(r$bigram)[i]
+          bslib::nav_panel(table_name, DT::dataTableOutput(ns(paste0("bigram_data_table_", i))))
+        })
+        
+        return(bslib::navset_underline(
+          !!!table_nav_panels
+        ))
+      } else {
+        return(DT::dataTableOutput(ns("bigram_data_table_1")))
+      }
+    }) # ui layout
     
   })
 }
