@@ -17,7 +17,7 @@ bigramVizUi <- function(id){
       ),
       shinycssloaders::withSpinner(
         shiny::uiOutput(ns("bigram_card_layout"))
-        )
+      )
     ),
     full_screen = TRUE,
     min_height = "300px"
@@ -36,6 +36,8 @@ bigramVizServer <- function(id, r){
     shiny::observeEvent(input$bigram_action, {
       
       r$bigram_calculated <- FALSE
+      r$bigram <- NULL
+      r$n_bigrams <- NULL
       
       if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
         r$bigram <- count_ngram_app(df = r$df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
@@ -48,37 +50,43 @@ bigramVizServer <- function(id, r){
         r$n_bigrams <- length(r$bigram) 
       }
       
-      output$bigram_card_layout <- shiny::renderUI({
-        req(r$n_bigrams)
-        
-        if (r$n_bigrams > 1){
-          nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
-            bigram_name <- names(r$bigram)[i]
-            bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
-          })
-          
-          bslib::navset_underline(
-            !!!nav_panels
-          )
-        } else {
-          shiny::plotOutput(ns("bigram_group_1"))
-        }
-      }) # ui layout
+      r$bigram_calculated <- TRUE
       
       if (r$n_bigrams > 1){
         lapply(seq_along(r$bigram), function(i) {
           output[[paste0("bigram_group_", i)]] <- shiny::renderPlot({
+            req(r$bigram)
             ParseR::viz_ngram(r$bigram[[i]]$viz )
           })
         })
       } else {
         output$bigram_group_1 <- shiny::renderPlot({
+          req(r$bigram)
           ParseR::viz_ngram(r$bigram$viz)
         })
       } # render ui
+  
+      })
+    
+    output$bigram_card_layout <- shiny::renderUI({
+      req(r$bigram)
       
-      r$bigram_calculated <- TRUE
-      }) 
+      if (r$n_bigrams > 1){
+        nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
+          bigram_name <- names(r$bigram)[i]
+          bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
+        })
+        
+        # shinycssloaders::withSpinner(
+          bslib::navset_underline(!!!nav_panels)
+        # ) 
+      } else {
+        # # shinycssloaders::withSpinner(
+          shiny::plotOutput(ns("bigram_group_1"))
+        # )
+      }
+    }) # ui layout
+    
     })
 }
 
