@@ -20,7 +20,8 @@ bigramVizUi <- function(id){
       )
     ),
     full_screen = TRUE,
-    min_height = "300px"
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
@@ -95,11 +96,8 @@ bigramDataUi <- function(id){
       )
     ),
     full_screen = TRUE,
-    style = bslib::css(
-      gap ="0.25rem",
-      resize = "horizontal"
-    ),
-    min_height = "300px"
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 

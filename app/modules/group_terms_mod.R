@@ -1,4 +1,4 @@
-groupTermsUi <- function(id){
+groupTermsVizUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
@@ -26,7 +26,7 @@ groupTermsUi <- function(id){
   )
 }
 
-groupTermsServer <- function(id, r){
+groupTermsVizServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -37,6 +37,8 @@ groupTermsServer <- function(id, r){
     
     shiny::observeEvent(input$gt_action, {
       message("calculating & plotting group terms")
+      r$viz_gt <- NULL # To facilitate css spinner timing
+      r$gt_group_var <- input$gt_group_column
       
       r$gt_selected_terms <- if (is.null(input$gt_selected_terms)){
         NULL
@@ -44,21 +46,24 @@ groupTermsServer <- function(id, r){
         strsplit(input$gt_selected_terms, ",\\s*")[[1]]
       }
       
-      output$gt_viz <- shiny::renderPlot({
-        ParseR::viz_group_terms_network(
-          data = r$df,
-          group_var = !!rlang::sym(input$gt_group_column),
-          # text_var = !!rlang::sym(r$text_var),
-          text_var = clean_text,
-          n_terms = input$gt_n_terms,
-          text_size = 4,
-          with_ties = FALSE, # need to add customisation for all of this
-          group_colour_map = NULL,
-          terms_colour = "black",
-          selected_terms = r$gt_selected_terms,
-          selected_terms_colour = "pink"
-        )
-      })
+      r$viz_gt <- ParseR::viz_group_terms_network(
+        data = r$df,
+        group_var = !!rlang::sym(r$gt_group_var),
+        # text_var = !!rlang::sym(r$text_var),
+        text_var = clean_text,
+        n_terms = input$gt_n_terms,
+        text_size = 4,
+        with_ties = FALSE, # need to add customisation for all of this
+        group_colour_map = NULL,
+        terms_colour = "black",
+        selected_terms = r$gt_selected_terms,
+        selected_terms_colour = "pink"
+      )
+    })
+    
+    output$gt_viz <- shiny::renderPlot({
+      req(r$viz_gt)
+      r$viz_gt
     })
     
     
@@ -66,3 +71,49 @@ groupTermsServer <- function(id, r){
   })
   
 }
+
+groupTermsDataUi <- function(id){
+  ns <- shiny::NS(id)
+  bslib::card(
+    bslib::card_header("Group Terms Data"),
+    bslib::card_body(
+      shinycssloaders::withSpinner(
+        shiny::uiOutput(ns("gt_data_output"))
+      )
+    ),
+    full_screen = TRUE,
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
+  )
+}
+
+groupTermsDataServer <- function(id, r){
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+   output$gt_data_output <- shiny::renderUI({
+     req(r$viz_gt)
+     gt_terms <- get_gt_terms(r$viz_gt)
+     shiny::tagList(
+       select_input_with_tooltip(ns("gt_term_select"), "Select Term", 
+                               icon_info = "Select a term from the group terms network that you would like to see posts on.",
+                               choice_list = gt_terms, multiple_selections = TRUE),
+       DT::dataTableOutput(ns("gt_data_display")) 
+     )
+   })
+   
+   shiny::observe({
+     req(input$gt_term_select)
+     print(input$gt_term_select)
+     r$gt_table <- create_group_terms_table(input$gt_term_select, r$df, r$gt_group_var)
+     message(class(r$gt_table))
+   })
+   
+   output$gt_data_display <- DT::renderDataTable({
+     req(r$viz_gt, r$gt_table)
+     datatable_display_app(r$gt_table)
+   })
+    
+  })
+}
+

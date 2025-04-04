@@ -147,3 +147,43 @@ datatable_display_app <- function(df){
     )
   )
 }
+
+create_group_terms_table_opt <- function(graph_obj, df, group_var){
+  
+  graph_data <- graph_obj$data
+  group_term_node_size <- sort(graph_data$size, decreasing = T)[1]
+  group_terms <- graph_data[graph_data$size == group_term_node_size, ][["node_name"]]
+  
+  graph_terms <- graph_data[!graph_data$node_name %in% group_terms,][["node_name"]]
+  
+  df_table <- purrr::map_dfr(graph_terms, function(term){
+    df_term <- df[grep(term, df$clean_text, fixed = T),]
+    df_term$Term <- term
+    df_term <- df_term[c("Term", group_var, "Message")]
+    return(df_term)
+  }) 
+  
+  return(df_table)
+}
+
+create_group_terms_table <- function(graph_terms, df, group_var){
+
+  df_table <- purrr::map_dfr(graph_terms, function(term){
+    df_term <- df[grep(term, df$clean_text, fixed = T),]
+    df_term$Term <- term
+    df_term <- df_term[c("Term", group_var, "Message")]
+    return(df_term)
+  }) 
+  
+  return(df_table)
+}
+
+get_gt_terms <- function(graph_obj){
+  
+  graph_data <- graph_obj$data
+  group_term_node_size <- sort(graph_data$size, decreasing = T)[1]
+  group_terms <- graph_data[graph_data$size == group_term_node_size, ][["node_name"]]
+  graph_terms <- graph_data[!graph_data$node_name %in% group_terms,][["node_name"]]
+  
+  return(graph_terms)
+}
