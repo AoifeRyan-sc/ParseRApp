@@ -117,6 +117,30 @@ bigram_pairs <- function(bigram_output, df){
   return(bigram_df)
 }
 
+bigram_pairs_wip <-function(bigram_output, df){
+  
+  bigram_pairs <- paste(bigram_output$word1, bigram_output$word2, sep = " ")
+  bigram_df <- purrr::map_dfr(bigram_pairs, function(bigram_pair) {
+    df_filtered <- df[grep(bigram_pair, df$clean_text, fixed = T),]
+    if (nrow(df_filtered) > 0){
+      print(class(bigram_pair))
+      print(bigram_pair)
+      df_filtered$bigram_pair <- as.factor(bigram_pair)
+    } 
+    
+    df_filtered <- df_filtered[c("bigram_pair", "Message", "clean_text")]
+    print("0 rows")
+    
+    # 
+    # df_filtered$bigram_pair <- as.factor(df_filtered$bigram_pair)
+    return(df_filtered)
+  })
+  
+  
+  return(bigram_df)
+  # return(bigram_pairs)
+}
+
 
 # Personalised functions ----
 count_ngram_app <- function(df, text_var, top_n, min_freq){
@@ -148,6 +172,7 @@ datatable_display_app <- function(df){
   )
 }
 
+# Group Terms Functions ----
 create_group_terms_table_opt <- function(graph_obj, df, group_var){
   
   graph_data <- graph_obj$data
@@ -159,7 +184,7 @@ create_group_terms_table_opt <- function(graph_obj, df, group_var){
   df_table <- purrr::map_dfr(graph_terms, function(term){
     df_term <- df[grep(term, df$clean_text, fixed = T),]
     df_term$Term <- term
-    df_term <- df_term[c("Term", group_var, "Message")]
+    df_term <- df_term[c(as.factor(Term), as.factor(group_var), Message)]
     return(df_term)
   }) 
   
@@ -172,6 +197,8 @@ create_group_terms_table <- function(graph_terms, df, group_var){
     df_term <- df[grep(term, df$clean_text, fixed = T),]
     df_term$Term <- term
     df_term <- df_term[c("Term", group_var, "Message")]
+    df_term$Term <- as.factor(df_term$Term)
+    df_term[[group_var]] <- as.factor(df_term[[group_var]])
     return(df_term)
   }) 
   

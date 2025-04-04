@@ -104,7 +104,6 @@ groupTermsDataServer <- function(id, r){
    
    shiny::observe({
      req(input$gt_term_select)
-     print(input$gt_term_select)
      r$gt_table <- create_group_terms_table(input$gt_term_select, r$df, r$gt_group_var)
      message(class(r$gt_table))
    })
