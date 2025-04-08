@@ -49,8 +49,8 @@ ui <- bslib::page_sidebar(
   bslib::layout_column_wrap(
     width = 1/2,
     heights_equal = "row",
-    wloUi("wlo_card"),
-    card3
+    wloVizUi("wlo_viz_card"),
+    wloDataUi("wlo_data_card"),
   ),
   )
 )

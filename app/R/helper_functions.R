@@ -214,3 +214,59 @@ get_gt_terms <- function(graph_obj){
   
   return(graph_terms)
 }
+
+
+# ----
+
+app_wlo <- function (df, topic_var, text_var = Message, top_n = 30, filter_by = c("association", 
+                                                                                   "frequency"), top_terms_cutoff = 500, nrow = 4) 
+{
+  if (!tibble::is_tibble(df) && !is.data.frame(df)) {
+    stop("Input 'df' must be a tibble or a data frame.")
+  }
+  if (!rlang::has_name(df, deparse(substitute(text_var)))) {
+    stop("Column specified by 'text_var = ' not found in 'df'.")
+  }
+
+  if (!(is.numeric(top_n) && top_n > 0 && top_n%%1 == 0)) {
+    stop("Parameter 'min_freq' must be a positive integer.")
+  }
+  if (!(is.numeric(top_n) && is.numeric(top_terms_cutoff) &&
+        top_terms_cutoff >= top_n)) {
+    stop("Parameter top_terms_cutoff must be greater than or equal to top_n")
+  }
+  filter_by <- match.arg(filter_by, choices = c("association",
+                                                "frequency"))
+  
+  text_var <- rlang::enquo(text_var)
+  topic_var <- rlang::enquo(topic_var)
+  
+  wlos <- df %>% tidytext::unnest_tokens(word, !!text_var) %>%
+    dplyr::count(!!topic_var, word) %>% tidylo::bind_log_odds(set = !!topic_var,
+                                                              feature = word, n = n, uninformative = TRUE)
+  if (filter_by == "association") {
+    global_word_frequency <- wlos %>% dplyr::count(word,
+                                                   wt = n, name = "global_n") %>% dplyr::slice_max(order_by = global_n,
+                                                                                                   n = top_terms_cutoff)
+    wlos <- wlos %>% dplyr::filter(word %in% global_word_frequency$word) %>%
+      dplyr::slice_max(order_by = log_odds_weighted, n = top_n,
+                       by = !!topic_var, with_ties = FALSE)
+  }
+  else {
+    wlos <- wlos %>% dplyr::slice_max(n = top_n, order_by = n,
+                                      by = !!topic_var, with_ties = FALSE)
+  }
+  wlos <- wlos %>% dplyr::arrange(dplyr::desc(n))
+  viz <- wlos %>% ggplot2::ggplot(ggplot2::aes(x = n, y = log_odds_weighted,
+                                               label = word)) + ggplot2::geom_hline(yintercept = 0,
+                                                                                    linetype = 2, color = "gray50", alpha = 0.5) + ggrepel::geom_text_repel(size = 3,
+                                                                                                                                                            segment.size = 0.5, color = "black", bg.color = "white",
+                                                                                                                                                            max.overlaps = top_n, force = 10) + ggplot2::geom_point(size = 0.4,
+                                                                                                                                                                                                                    show.legend = FALSE) + ggplot2::facet_wrap(c(topic_var),
+                                                                                                                                                                                                                                                               nrow = nrow, scales = "free") + ggplot2::scale_x_log10() +
+    ggplot2::labs(x = "Word frequency", y = "Log odds ratio, weighted by uninformative Dirichlet prior") +
+    ggplot2::theme_minimal() + ggplot2::theme(strip.background = ggplot2::element_rect(fill = "white",
+                                                                                       colour = "white"), strip.text = ggplot2::element_text(face = "bold"),
+                                              panel.grid.minor = ggplot2::element_blank())
+  return(list(viz = viz, view = wlos))
+}

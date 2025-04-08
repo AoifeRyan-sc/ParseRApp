@@ -1,4 +1,4 @@
-wloUi <- function(id){
+wloVizUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
@@ -11,14 +11,15 @@ wloUi <- function(id){
                                    icon_info = "The number of terms you want to show per group."),
         numeric_input_with_tooltip(ns("wlo_n_rows"), "Number of rows:", default_value = 3, 
                                    icon_info = "The number of rows you want your groups to be rendered across. The number of columns will be automatically generated based on the number of rows you select."),
-        select_input_with_tooltip(id = ns("wlo_filter_column"), title = "Filter By:", 
+        select_input_with_tooltip(id = ns("wlo_filter"), title = "Filter By:", 
                                   icon_info = "Do you want to show terms that are the highest frequency in each group or the terms that are most associated with each category?",
                                   choice_list = c("association", "frequency"), select = "association"),
-        dropdown_title = "Group Terms Inputs", 
-        icon_info = "Click here for Group Terms customisation"
+        shiny::actionButton(ns("wlo_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
+        dropdown_title = "Weighted Log Odds Inputs", 
+        icon_info = "Click here for WLO customisation"
       ), # need to add more parameters here
       shinycssloaders::withSpinner(
-        shiny::plotOutput(ns("gt_viz"))
+        shiny::plotOutput(ns("wlo_viz"))
       )
     ),
     full_screen = TRUE,
@@ -26,7 +27,7 @@ wloUi <- function(id){
   )
 }
 
-wloServer <- function(id, r){
+wloVizServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -35,23 +36,50 @@ wloServer <- function(id, r){
       shiny::updateSelectizeInput(session = session, "wlo_group_column", choices = colnames(r$df), selected = NULL)
     })
     
-    output$gt_viz <- shiny::renderPlot({
+    shiny::observeEvent(input$wlo_action, {
       req("clean_text" %in% colnames(r$df), input$wlo_group_column)
-      message("calculating & plotting wlo")
       
-      ParseR::calculate_wlos(
+      # r$wlo <- ParseR::calculate_wlos(
+      r$wlo <- app_wlo(
         df = r$df,
+        # topic_var = input$wlo_group_column,
         text_var = clean_text,
         topic_var = !!rlang::sym(input$wlo_group_column),
         top_n = 30,
-        filter_by = input$wlo_filter_column,
+        filter_by = input$wlo_filter,
         top_terms_cutoff = 500,
         nrow = input$wlo_n_rows
       )
+    })
+    
+    output$wlo_viz <- shiny::renderPlot({
+      req(r$wlo)
+      r$wlo
       # message("group terms plotted")
       
     })
     
+    
+  })
+  
+}
+
+wloDataUi <- function(id){
+  ns <- shiny::NS(id)
+  bslib::card(
+    bslib::card_header(
+      shiny::HTML("Weighted Log Odds <i>(make selections in dropdown to render)</i>")),
+    bslib::card_body(
+      "content"
+    ),
+    full_screen = TRUE,
+    min_height = 500
+  )
+}
+
+wloDataServer <- function(id, r){
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
     
   })
   

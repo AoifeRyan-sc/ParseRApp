@@ -54,10 +54,6 @@ groupTermsVizServer <- function(id, r){
         strsplit(input$gt_selected_terms, ",\\s*")[[1]]
       }
       
-      message("group colour", is.null(input$gt_group_colour))
-      message("term colour", is.null(input$gt_term_colour))
-      message("emphasis colour", is.null(input$gt_emphasis_colour))
-      
       r$viz_gt <- ParseR::viz_group_terms_network(
         data = r$df,
         group_var = !!rlang::sym(r$gt_group_var),
