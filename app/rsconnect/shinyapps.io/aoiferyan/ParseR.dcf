@@ -5,7 +5,7 @@ account: aoiferyan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14428893
-bundleId:
+bundleId: 10077726
 url: https://aoiferyan.shinyapps.io/ParseR/
 version: 1
 asMultiple: FALSE
