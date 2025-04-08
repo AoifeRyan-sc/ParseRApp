@@ -44,11 +44,11 @@ numeric_input_with_tooltip <- function(id, title, default_value, icon_info){
   )
 }
 
-text_input_with_tooltip <- function(id, title, icon_info){
+text_input_with_tooltip <- function(id, title, icon_info, placeholder = NULL, value = NULL){
   
   shiny::div(
     style = "position: relative",
-    shiny::textInput(id, title, placeholder = "hispanic, heritage"),
+    shiny::textInput(id, title, placeholder = placeholder, value = value),
     shiny::div(
       style = "position: absolute; top: 0; right: 5px;",
       bslib::tooltip(

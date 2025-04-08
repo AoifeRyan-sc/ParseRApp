@@ -10,9 +10,17 @@ groupTermsVizUi <- function(id){
         numeric_input_with_tooltip(ns("gt_n_terms"), "Number of terms:", default_value = 20, 
                                    icon_info = "The number of terms you want to show per group."),
         text_input_with_tooltip(id = ns("gt_selected_terms"), "Emphasise terms:", 
-                                icon_info = "Any terms you want to stand out in the output chart."),
-        text_input_with_tooltip(id = ns("gt_emphasis_colour"), "HEX Code:", 
-                                icon_info = "The HEX code for the colour you want to highlight selected terms in. Defaults to "),
+                                icon_info = "Any terms you want to stand out in the output chart.",
+                                placeholder = "hispanic, heritage"),
+        # text_input_with_tooltip(id = ns("gt_group_colour"), "Group Colours:", 
+        #                         icon_info = "The HEX code for the group node colour.",
+        #                         value = "#FFFF00"), # need to implement a per term box
+        text_input_with_tooltip(id = ns("gt_term_colour"), "Term Colours:", 
+                                icon_info = "The HEX code for the terms.",
+                                value = "#000000"),
+        text_input_with_tooltip(id = ns("gt_emphasis_colour"), "Emphasised Term Colours:", 
+                                icon_info = "The HEX code for any emphasised terms.",
+                                value = "#FFC0CB"),
         shiny::actionButton(ns("gt_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"
@@ -46,6 +54,10 @@ groupTermsVizServer <- function(id, r){
         strsplit(input$gt_selected_terms, ",\\s*")[[1]]
       }
       
+      message("group colour", is.null(input$gt_group_colour))
+      message("term colour", is.null(input$gt_term_colour))
+      message("emphasis colour", is.null(input$gt_emphasis_colour))
+      
       r$viz_gt <- ParseR::viz_group_terms_network(
         data = r$df,
         group_var = !!rlang::sym(r$gt_group_var),
@@ -54,10 +66,10 @@ groupTermsVizServer <- function(id, r){
         n_terms = input$gt_n_terms,
         text_size = 4,
         with_ties = FALSE, # need to add customisation for all of this
-        group_colour_map = NULL,
-        terms_colour = "black",
+        # group_colour_map = input$gt_group_colour,
+        terms_colour = input$gt_term_colour,
         selected_terms = r$gt_selected_terms,
-        selected_terms_colour = "pink"
+        selected_terms_colour = input$gt_emphasis_colour
       )
     })
     

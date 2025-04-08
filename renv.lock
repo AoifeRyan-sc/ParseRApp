@@ -64,6 +64,50 @@
       "Maintainer": "Joe Cheng <joe@posit.co>",
       "Repository": "CRAN"
     },
+    "LimpiaR": {
+      "Package": "LimpiaR",
+      "Version": "1.1.0",
+      "Source": "GitHub",
+      "Title": "LimpiaR",
+      "Authors@R": "as.person(c( \"Jack Penzer <jack.penzer@sharecreative.com> [cre]\", \"Tim Mooney <tim.mooney@sharecreative.com> [aut]\", \"SHARE Creative [cph]\" ))",
+      "Description": "SHARE & SAMY Group's dedicated pre-processing suite for Spanish & English data sets. A range of functions for getting text data ready to be analysed.",
+      "URL": "https://jpcompartir.github.io/LimpiaR",
+      "License": "MIT + file LICENSE",
+      "Encoding": "UTF-8",
+      "LazyData": "true",
+      "Roxygen": "list(markdown = TRUE)",
+      "RoxygenNote": "7.3.2",
+      "Imports": [
+        "dplyr (>= 1.0.10)",
+        "rlang (>= 1.0.6)",
+        "stringr (>= 1.5.0)",
+        "tibble (>= 3.1.8)",
+        "magrittr (>= 2.0.3)",
+        "hash (>= 2.2.6.2)",
+        "tidytext (>= 0.4.0)",
+        "udpipe (>= 0.8.11)",
+        "tidyr (>= 1.2.1)"
+      ],
+      "Suggests": [
+        "rmarkdown (>= 2.14)",
+        "knitr (>= 1.39)",
+        "janitor (>= 2.1.0)",
+        "testthat (>= 3.0.0)"
+      ],
+      "Config/testthat/edition": "3",
+      "Depends": [
+        "R (>= 3.50)"
+      ],
+      "VignetteBuilder": "knitr",
+      "Author": "Jack Penzer [cre], Tim Mooney [aut], SHARE Creative [cph]",
+      "Maintainer": "Jack Penzer <jack.penzer@sharecreative.com>",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "jpcompartir",
+      "RemoteRepo": "LimpiaR",
+      "RemoteRef": "main",
+      "RemoteSha": "d3048a9370fb66e4a34310daf0aa73c7a3ade6b4"
+    },
     "MASS": {
       "Package": "MASS",
       "Version": "7.3-64",
@@ -1808,6 +1852,31 @@
       "Maintainer": "Thomas Lin Pedersen <thomas.pedersen@posit.co>",
       "Repository": "CRAN"
     },
+    "hash": {
+      "Package": "hash",
+      "Version": "2.2.6.3",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Full Featured Implementation of Hash Tables/Associative Arrays/Dictionaries",
+      "Date": "2023-08-19",
+      "Authors@R": "c(person(\"Christopher\", \"Brown\", email = \"chris.brown@decisionpatterns.com\", role = \"aut\"), person(\"John\", \"Hughes\", email = \"drjphughesjr@gmail.com\", role = c(\"cre\", \"ctb\")))",
+      "Depends": [
+        "R (>= 2.12.0)",
+        "methods",
+        "utils"
+      ],
+      "Suggests": [
+        "testthat"
+      ],
+      "Description": "Implements a data structure similar to hashes in Perl and dictionaries in Python but with a purposefully R flavor. For objects of appreciable size, access using hashes outperforms native named lists and vectors.",
+      "License": "GPL (>= 2)",
+      "URL": "http://www.johnhughes.org",
+      "NeedsCompilation": "no",
+      "Author": "Christopher Brown [aut], John Hughes [cre, ctb]",
+      "Maintainer": "John Hughes <drjphughesjr@gmail.com>",
+      "Repository": "RSPM",
+      "Encoding": "UTF-8"
+    },
     "highr": {
       "Package": "highr",
       "Version": "0.11",
@@ -3358,6 +3427,75 @@
       "Maintainer": "Winston Chang <winston@posit.co>",
       "Repository": "CRAN"
     },
+    "shinyWidgets": {
+      "Package": "shinyWidgets",
+      "Version": "0.9.0",
+      "Source": "Repository",
+      "Title": "Custom Inputs Widgets for Shiny",
+      "Authors@R": "c( person(\"Victor\", \"Perrier\", email = \"victor.perrier@dreamrs.fr\", role = c(\"aut\", \"cre\", \"cph\")), person(\"Fanny\", \"Meyer\", role = \"aut\"), person(\"David\", \"Granjon\", role = \"aut\"), person(\"Ian\", \"Fellows\", role = \"ctb\", comment = \"Methods for mutating vertical tabs & updateMultiInput\"), person(\"Wil\", \"Davis\", role = \"ctb\", comment = \"numericRangeInput function\"), person(\"Spencer\", \"Matthews\", role = \"ctb\", comment = \"autoNumeric methods\"), person(family = \"JavaScript and CSS libraries authors\", role = c(\"ctb\", \"cph\"), comment = \"All authors are listed in LICENSE.md\") )",
+      "Description": "Collection of custom input controls and user interface components for 'Shiny' applications.  Give your applications a unique and colorful style !",
+      "URL": "https://github.com/dreamRs/shinyWidgets, https://dreamrs.github.io/shinyWidgets/",
+      "BugReports": "https://github.com/dreamRs/shinyWidgets/issues",
+      "License": "GPL-3",
+      "Encoding": "UTF-8",
+      "LazyData": "true",
+      "RoxygenNote": "7.3.2",
+      "Depends": [
+        "R (>= 3.1.0)"
+      ],
+      "Imports": [
+        "bslib",
+        "sass",
+        "shiny (>= 1.6.0)",
+        "htmltools (>= 0.5.1)",
+        "jsonlite",
+        "grDevices",
+        "rlang"
+      ],
+      "Suggests": [
+        "testthat",
+        "covr",
+        "ggplot2",
+        "DT",
+        "scales",
+        "shinydashboard",
+        "shinydashboardPlus"
+      ],
+      "NeedsCompilation": "no",
+      "Author": "Victor Perrier [aut, cre, cph], Fanny Meyer [aut], David Granjon [aut], Ian Fellows [ctb] (Methods for mutating vertical tabs & updateMultiInput), Wil Davis [ctb] (numericRangeInput function), Spencer Matthews [ctb] (autoNumeric methods), JavaScript and CSS libraries authors [ctb, cph] (All authors are listed in LICENSE.md)",
+      "Maintainer": "Victor Perrier <victor.perrier@dreamrs.fr>",
+      "Repository": "CRAN"
+    },
+    "shinybusy": {
+      "Package": "shinybusy",
+      "Version": "0.3.3",
+      "Source": "Repository",
+      "Title": "Busy Indicators and Notifications for 'Shiny' Applications",
+      "Authors@R": "c(person(\"Fanny\", \"Meyer\", role = \"aut\"), person(\"Victor\", \"Perrier\", email = \"victor.perrier@dreamrs.fr\", role = c(\"aut\", \"cre\")), person(\"Silex Technologies\", comment = \"https://www.silex-ip.com\", role = \"fnd\"))",
+      "Description": "Add indicators (spinner, progress bar, gif) in your 'shiny' applications to show the user that the server is busy. And other tools to let your users know something is happening (send notifications, reports, ...).",
+      "License": "GPL-3",
+      "Encoding": "UTF-8",
+      "Imports": [
+        "htmltools",
+        "shiny",
+        "jsonlite",
+        "htmlwidgets"
+      ],
+      "RoxygenNote": "7.3.1",
+      "URL": "https://github.com/dreamRs/shinybusy, https://dreamrs.github.io/shinybusy/",
+      "BugReports": "https://github.com/dreamRs/shinybusy/issues",
+      "Suggests": [
+        "testthat",
+        "covr",
+        "knitr",
+        "rmarkdown"
+      ],
+      "VignetteBuilder": "knitr",
+      "NeedsCompilation": "no",
+      "Author": "Fanny Meyer [aut], Victor Perrier [aut, cre], Silex Technologies [fnd] (https://www.silex-ip.com)",
+      "Maintainer": "Victor Perrier <victor.perrier@dreamrs.fr>",
+      "Repository": "CRAN"
+    },
     "shinycssloaders": {
       "Package": "shinycssloaders",
       "Version": "1.1.0",
@@ -4029,6 +4167,44 @@
       "NeedsCompilation": "yes",
       "Author": "Thomas Lin Pedersen [aut, cre] (<https://orcid.org/0000-0002-5147-4711>)",
       "Repository": "CRAN"
+    },
+    "udpipe": {
+      "Package": "udpipe",
+      "Version": "0.8.11",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Tokenization, Parts of Speech Tagging, Lemmatization and Dependency Parsing with the 'UDPipe' 'NLP' Toolkit",
+      "Maintainer": "Jan Wijffels <jwijffels@bnosac.be>",
+      "Authors@R": "c( person('Jan', 'Wijffels', role = c('aut', 'cre', 'cph'), email = 'jwijffels@bnosac.be'),  person('BNOSAC', role = 'cph'),  person(\"Institute of Formal and Applied Linguistics, Faculty of Mathematics and Physics, Charles University in Prague, Czech Republic\", role = 'cph'),  person('Milan Straka', role = c('ctb', 'cph'), email = 'straka@ufal.mff.cuni.cz'),  person('Jana Straková', role = c('ctb', 'cph'), email = 'strakova@ufal.mff.cuni.cz'))",
+      "Description": "This natural language processing toolkit provides language-agnostic 'tokenization', 'parts of speech tagging', 'lemmatization' and 'dependency parsing' of raw text. Next to text parsing, the package also allows you to train annotation models based on data of 'treebanks' in 'CoNLL-U' format as provided at <https://universaldependencies.org/format.html>. The techniques are explained in detail in the paper: 'Tokenizing, POS Tagging, Lemmatizing and Parsing UD 2.0 with UDPipe', available at <doi:10.18653/v1/K17-3009>.  The toolkit also contains functionalities for commonly used data manipulations on texts  which are enriched with the output of the parser. Namely functionalities and algorithms  for collocations, token co-occurrence, document term matrix handling,  term frequency inverse document frequency calculations, information retrieval metrics (Okapi BM25), handling of multi-word expressions, keyword detection (Rapid Automatic Keyword Extraction, noun phrase extraction, syntactical patterns)  sentiment scoring and semantic similarity analysis.",
+      "License": "MPL-2.0",
+      "URL": "https://bnosac.github.io/udpipe/en/index.html, https://github.com/bnosac/udpipe",
+      "Encoding": "UTF-8",
+      "Depends": [
+        "R (>= 2.10)"
+      ],
+      "Imports": [
+        "Rcpp (>= 0.11.5)",
+        "data.table (>= 1.9.6)",
+        "Matrix",
+        "methods",
+        "stats"
+      ],
+      "LinkingTo": [
+        "Rcpp"
+      ],
+      "VignetteBuilder": "knitr",
+      "Suggests": [
+        "knitr",
+        "rmarkdown",
+        "topicmodels",
+        "lattice",
+        "parallel"
+      ],
+      "RoxygenNote": "7.1.2",
+      "NeedsCompilation": "yes",
+      "Author": "Jan Wijffels [aut, cre, cph], BNOSAC [cph], Institute of Formal and Applied Linguistics, Faculty of Mathematics and Physics, Charles University in Prague, Czech Republic [cph], Milan Straka [ctb, cph], Jana Straková [ctb, cph]",
+      "Repository": "RSPM"
     },
     "utf8": {
       "Package": "utf8",
