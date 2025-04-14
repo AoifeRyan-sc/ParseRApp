@@ -37,14 +37,13 @@ wloVizServer <- function(id, r){
     })
     
     shiny::observeEvent(input$wlo_action, {
-      req("clean_text" %in% colnames(r$df), input$wlo_group_column)
+      r$viz_wlo <- NULL
+      r$wlo_group_var <- input$wlo_group_column
       
-      # r$wlo <- ParseR::calculate_wlos(
-      r$wlo <- app_wlo(
+      r$viz_wlo <- ParseR::calculate_wlos(
         df = r$df,
-        # topic_var = input$wlo_group_column,
         text_var = clean_text,
-        topic_var = !!rlang::sym(input$wlo_group_column),
+        topic_var = !!rlang::sym(r$wlo_group_var),
         top_n = 30,
         filter_by = input$wlo_filter,
         top_terms_cutoff = 500,
@@ -53,10 +52,8 @@ wloVizServer <- function(id, r){
     })
     
     output$wlo_viz <- shiny::renderPlot({
-      req(r$wlo)
-      r$wlo
-      # message("group terms plotted")
-      
+      req(r$viz_wlo)
+      r$viz_wlo
     })
     
     
@@ -68,9 +65,11 @@ wloDataUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
-      shiny::HTML("Weighted Log Odds <i>(make selections in dropdown to render)</i>")),
+      shiny::HTML("Weighted Log Odds Data")),
     bslib::card_body(
-      "content"
+      shinycssloaders::withSpinner(
+        shiny::uiOutput(ns("wlo_data_output"))
+      )
     ),
     full_screen = TRUE,
     min_height = 500
@@ -80,6 +79,27 @@ wloDataUi <- function(id){
 wloDataServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    output$wlo_data_output <- shiny::renderUI({
+      req(r$viz_wlo)
+      wlo_terms <- get_wlo_terms(r$viz_wlo$view)
+      shiny::tagList(
+        select_input_with_tooltip(ns("wlo_term_select"), "Select Term", 
+                                  icon_info = "Select a term from the Weighted Log Odds that you would like to see posts on.",
+                                  choice_list = wlo_terms, multiple_selections = TRUE),
+        DT::dataTableOutput(ns("wlo_data_display")) 
+      )
+    })
+    
+    shiny::observe({
+      req(input$wlo_term_select)
+      r$wlo_table <- create_terms_table(input$wlo_term_select, r$df, r$wlo_group_var, r$text_var)
+    })
+    
+    output$wlo_data_display <- DT::renderDataTable({
+      req(r$viz_wlo, r$wlo_table)
+      datatable_display_app(r$wlo_table)
+    })
     
   })
   

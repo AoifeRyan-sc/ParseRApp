@@ -44,7 +44,6 @@ groupTermsVizServer <- function(id, r){
     })
     
     shiny::observeEvent(input$gt_action, {
-      message("calculating & plotting group terms")
       r$viz_gt <- NULL # To facilitate css spinner timing
       r$gt_group_var <- input$gt_group_column
       
@@ -112,7 +111,8 @@ groupTermsDataServer <- function(id, r){
    
    shiny::observe({
      req(input$gt_term_select)
-     r$gt_table <- create_group_terms_table(input$gt_term_select, r$df, r$gt_group_var)
+     print("making table")
+     r$gt_table <- create_terms_table(viz_terms = input$gt_term_select, df = r$df, group_var = r$gt_group_var, message_var = r$text_var)
      message(class(r$gt_table))
    })
    

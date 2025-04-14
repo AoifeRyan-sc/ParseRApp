@@ -40,6 +40,8 @@ bigramVizServer <- function(id, r){
       r$bigram <- NULL
       r$n_bigrams <- NULL
       
+      message("creating bigram")
+      
       if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
         r$bigram <- count_ngram_app(df = r$df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
         r$n_bigrams <- 1
@@ -52,6 +54,8 @@ bigramVizServer <- function(id, r){
       }
       
       r$bigram_calculated <- TRUE
+      
+      message("creating layout")
       
       if (r$n_bigrams > 1){
         lapply(seq_along(r$bigram), function(i) {
@@ -111,12 +115,12 @@ bigramDataServer <- function(id, r){
       if (r$n_bigrams > 1){
         req(r$bigram)
         r$bigram_table <- lapply(seq_along(r$bigram), function(i){
-          bigram_pairs(r$bigram[[i]]$view, r$df)
+          bigram_pairs(r$bigram[[i]]$view, r$df, r$text_var)
         })
         names(r$bigram_table) <- names(r$bigram)
       } else {
         req(r$bigram)
-        r$bigram_table <- bigram_pairs(r$bigram$view, r$df)
+        r$bigram_table <- bigram_pairs(r$bigram$view, r$df, r$text_var)
       } # create tables
       
       if (r$n_bigrams > 1){
