@@ -6,6 +6,7 @@
 library(shiny)
 library(here)
 library(magrittr)
+library(duckplyr)
 
 # Temporary to allow for live reloads in an RStudio background job or app running in a terminal:
 options(shiny.autoreload=TRUE)

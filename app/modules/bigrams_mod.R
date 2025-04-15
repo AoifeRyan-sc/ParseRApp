@@ -43,10 +43,10 @@ bigramVizServer <- function(id, r){
       message("creating bigram")
       
       if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
-        r$bigram <- count_ngram_app(df = r$df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
+        r$bigram <- count_ngram_app(df = collect(r$df), text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
         r$n_bigrams <- 1
       } else {
-        df_groups <- split(r$df, r$df[input$bigram_group_column])
+        df_groups <- split(dplyr::collect(r$df), dplyr::collect(r$df)[input$bigram_group_column])
         r$bigram <- lapply(df_groups, function(group_df) {
           count_ngram_app(df = group_df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
         })

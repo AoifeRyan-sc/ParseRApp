@@ -56,14 +56,17 @@ dataDisplayServer <- function(id, r){
     })
     
     output$data_display <- DT::renderDataTable({
+      req(r$df)
 
       if (is.null(r$url_var)){
         r$df[r$cols] %>%
+          dplyr::collect() %>%
           DT::datatable(
             filter = "top"
           )
       } else {
         r$df[r$cols] %>%
+          dplyr::collect() %>%
           LimpiaR::limpiar_link_click(!!rlang::sym(r$url_var)) %>%
           DT::datatable(
             filter = "top",
