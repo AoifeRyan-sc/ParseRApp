@@ -42,27 +42,29 @@ dataUploadServer <- function(id, r){
       
       if (nrow(r$df) > 50000){
         r$df <- NULL
-        shiny::showNotification("File must have less than 50k rows.",
-                                type = "warning",
-                                duration = 10)
+        shinyalert::shinyalert("File must have less than 50k rows.",
+                     closeOnEsc = TRUE,
+                     closeOnClickOutside = FALSE,
+                     type = "warning")
         output$file_upload_display <- renderUI({
           shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) # add some widgets?  
         })
+      } else {
+        shiny::showModal(shiny::modalDialog(
+          title = "Select a Column",
+          select_input_with_tooltip(id = ns("text_column"), title = "Text Column*", 
+                                    icon_info = "The name of the column with the text you want to analyse",
+                                    choice_list = colnames(r$df)),
+          select_input_with_tooltip(id = ns("author_column"), title = "Author Column*", 
+                                    icon_info = "The name of the author column",
+                                    choice_list = colnames(r$df)),
+          select_input_with_tooltip(id = ns("date_column"), title = "Date Column*", 
+                                    icon_info = "The name of the date column",
+                                    choice_list = colnames(r$df)),
+          footer = shiny::actionButton(ns("confirm_text_col"), "Go!")
+        ))
       }
       
-      shiny::showModal(shiny::modalDialog(
-        title = "Select a Column",
-        select_input_with_tooltip(id = ns("text_column"), title = "Text Column*", 
-                                  icon_info = "The name of the column with the text you want to analyse",
-                                  choice_list = colnames(r$df)),
-        select_input_with_tooltip(id = ns("author_column"), title = "Author Column*", 
-                                  icon_info = "The name of the author column",
-                                  choice_list = colnames(r$df)),
-        select_input_with_tooltip(id = ns("date_column"), title = "Date Column*", 
-                                  icon_info = "The name of the date column",
-                                  choice_list = colnames(r$df)),
-        footer = shiny::actionButton(ns("confirm_text_col"), "Go!")
-      ))
     }) # deal with uploaded file
     
   
