@@ -41,7 +41,7 @@ wloVizServer <- function(id, r){
       r$wlo_group_var <- input$wlo_group_column
       
       r$viz_wlo <- ParseR::calculate_wlos(
-        df = r$df,
+        df = collect(r$df),
         text_var = clean_text,
         topic_var = !!rlang::sym(r$wlo_group_var),
         top_n = 30,
@@ -82,23 +82,23 @@ wloDataServer <- function(id, r){
     
     output$wlo_data_output <- shiny::renderUI({
       req(r$viz_wlo)
-      wlo_terms <- get_wlo_terms(r$viz_wlo$view)
-      shiny::tagList(
-        select_input_with_tooltip(ns("wlo_term_select"), "Select Term", 
-                                  icon_info = "Select a term from the Weighted Log Odds that you would like to see posts on.",
-                                  choice_list = wlo_terms, multiple_selections = TRUE),
-        DT::dataTableOutput(ns("wlo_data_display")) 
-      )
+      DT::dataTableOutput(ns("wlo_data_display")) 
     })
     
     shiny::observe({
-      req(input$wlo_term_select)
-      r$wlo_table <- create_terms_table(input$wlo_term_select, r$df, r$wlo_group_var, r$text_var)
+      req(r$viz_wlo)
+      wlo_terms <- get_wlo_terms(r$viz_wlo$view)
+      r$wlo_table <- create_terms_table(wlo_terms, r$df, r$wlo_group_var, r$text_var)
+      print(head(r$wlo_table))
     })
     
     output$wlo_data_display <- DT::renderDataTable({
-      req(r$viz_wlo, r$wlo_table)
-      datatable_display_app(r$wlo_table)
+      req(r$wlo_table)
+      r$wlo_table %>% 
+        collect() %>%
+        mutate(Term = as.factor(Term),
+               Group = as.factor(Group)) %>%
+        datatable_display_app()
     })
     
   })

@@ -14,7 +14,7 @@ server <- function(input, output, session) {
   bigramDataServer("bigram_data_card", r)
   groupTermsVizServer("gt_viz_card", r)
   groupTermsDataServer("gt_data_card", r)
-  # wloVizServer("wlo_viz_card", r)
-  # wloDataServer("wlo_data_card", r)
-  # valueBoxServer("value_box_panel", r)
+  wloVizServer("wlo_viz_card", r)
+  wloDataServer("wlo_data_card", r)
+  valueBoxServer("value_box_panel", r)
 }

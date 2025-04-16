@@ -273,20 +273,20 @@ clean_df <- function(df, message_var, duckdb = F){
 }
 
 # popups ----
-file_size_logic <- function(file){
+file_size_logic <- function(file, df, ns){
   
   if (file){
     shiny::showModal(shiny::modalDialog(
       title = "Select a Column",
       select_input_with_tooltip(id = ns("text_column"), title = "Text Column*",
                                 icon_info = "The name of the column with the text you want to analyse",
-                                choice_list = colnames(master_df)),
+                                choice_list = colnames(df)),
       select_input_with_tooltip(id = ns("author_column"), title = "Author Column*",
                                 icon_info = "The name of the author column",
-                                choice_list = colnames(master_df)),
+                                choice_list = colnames(df)),
       select_input_with_tooltip(id = ns("date_column"), title = "Date Column*",
                                 icon_info = "The name of the date column",
-                                choice_list = colnames(master_df)),
+                                choice_list = colnames(df)),
       footer = shiny::actionButton(ns("confirm_text_col"), "Go!")
     ))
   } else {

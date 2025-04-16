@@ -39,14 +39,14 @@ dataUploadServer <- function(id, r){
       if (nrow(master_df) > 50000){
         r$df <- NULL # and maybe close connection?
         
-        file_size_logic(file = F)
+        file_size_logic(file = F, df = master_df, ns = ns)
         
         output$file_upload_display <- renderUI({
           shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) # add some widgets?
         })
       } else {
         
-        file_size_logic(file = T)
+        file_size_logic(file = T, df = master_df, ns = ns)
         
         r$con <- duckdb::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
         make_duckdb(df = master_df, con = r$con, name = "master_df")

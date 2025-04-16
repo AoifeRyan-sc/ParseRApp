@@ -28,15 +28,16 @@ valueBoxServer <- function(id, r){
     ns <- session$ns
 
     output$n_rows <- shiny::renderText({
-      nrow(r$df)
+      req(r$con)
+      DBI::dbGetQuery(r$con, "SELECT COUNT(*) AS n_rows FROM master_df")$n_rows
       })
     output$n_authors <- shiny::renderText({
       req(r$sender_var)
-      length(unique(r$df[[r$sender_var]]))
+      length(unique(r$df %>% dplyr::pull(r$sender_var)))
       })
     output$n_weeks <- shiny::renderText({
       req(r$date_var)
-      r$time_info <- as.Date(r$df[[r$date_var]])
+      r$time_info <- as.Date(r$df %>% dplyr::pull(r$date_var))
       length(unique(format(r$time_info, "%Y-%U")))
     })
     output$vot_chart <- plotly::renderPlotly({
