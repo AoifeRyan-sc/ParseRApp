@@ -296,3 +296,17 @@ file_size_logic <- function(file, df, ns){
                            type = "warning")
   }
 }
+
+# top terms ----
+make_top_terms <- function(df, n_terms){
+  
+  top_terms <- tmp_con %>% collect() %>%
+    tidytext::unnest_tokens(output = word, input = clean_text, token = "words", to_lower = FALSE) %>%
+    count(word) %>%
+    slice_max(n = n_terms, order_by = n, with_ties = F)
+    
+}
+
+viz_top_terms <- function(top_terms){
+  
+}
