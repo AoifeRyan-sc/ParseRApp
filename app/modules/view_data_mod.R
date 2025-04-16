@@ -48,24 +48,21 @@ dataDisplayServer <- function(id, r){
         input$url_column
       }
       
-      # r$url_var <- if (is.null(input$url_column) | input$url_column == ""){
-      #   NULL
-      # } else {
-      #   input$url_column
-      # }
     })
     
     output$data_display <- DT::renderDataTable({
       req(r$df)
 
       if (is.null(r$url_var)){
-        r$df[r$cols] %>%
+        r$df %>%
+          select(r$cols) %>%
           dplyr::collect() %>%
           DT::datatable(
             filter = "top"
           )
       } else {
-        r$df[r$cols] %>%
+        r$df %>%
+          select(r$cols) %>%
           dplyr::collect() %>%
           LimpiaR::limpiar_link_click(!!rlang::sym(r$url_var)) %>%
           DT::datatable(

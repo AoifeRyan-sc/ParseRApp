@@ -43,10 +43,12 @@ bigramVizServer <- function(id, r){
       message("creating bigram")
       
       if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
-        r$bigram <- count_ngram_app(df = collect(r$df), text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
+        r$bigram <- r$df %>%
+          collect() %>%
+          count_ngram_app(text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
         r$n_bigrams <- 1
       } else {
-        df_groups <- split(dplyr::collect(r$df), dplyr::collect(r$df)[input$bigram_group_column])
+        df_groups <- split(collect(r$df), collect(r$df)[input$bigram_group_column])
         r$bigram <- lapply(df_groups, function(group_df) {
           count_ngram_app(df = group_df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
         })
@@ -118,24 +120,29 @@ bigramDataServer <- function(id, r){
           bigram_pairs(r$bigram[[i]]$view, r$df, r$text_var)
         })
         names(r$bigram_table) <- names(r$bigram)
+        
+        lapply(seq_along(r$bigram_table), function(i) {
+          output[[paste0("bigram_data_table_", i)]] <- DT::renderDataTable({
+            r$bigram_table[[i]] %>%
+              collect() %>%
+              mutate(bigram_pairs = as.factor(bigram_pairs)) %>%
+              datatable_display_app()
+          })
+        })
+        
       } else {
         req(r$bigram)
         r$bigram_table <- bigram_pairs(r$bigram$view, r$df, r$text_var)
-      } # create tables
-      
-      if (r$n_bigrams > 1){
-        lapply(seq_along(r$bigram_table), function(i) {
-          output[[paste0("bigram_data_table_", i)]] <- DT::renderDataTable({
-            datatable_display_app(df = r$bigram_table[[i]])
-            })
-        })
-      } else {
+        
         output$bigram_data_table_1 <- DT::renderDataTable({
-          datatable_display_app(df = r$bigram_table)
+          r$bigram_table %>%
+            collect() %>%
+            mutate(bigram_pairs = as.factor(bigram_pairs)) %>%
+            datatable_display_app()
         })
-      } # render yu
-      
-    })
+      } # create tables and ui layout
+
+    }) # create bigram tables and ui layout
     
     output$bigram_data_display <-  shiny::renderUI({
       req(r$bigram)

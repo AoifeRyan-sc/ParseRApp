@@ -54,7 +54,7 @@ groupTermsVizServer <- function(id, r){
       }
       
       r$viz_gt <- ParseR::viz_group_terms_network(
-        data = r$df,
+        data = collect(r$df),
         group_var = !!rlang::sym(r$gt_group_var),
         # text_var = !!rlang::sym(r$text_var),
         text_var = clean_text,
@@ -99,26 +99,25 @@ groupTermsDataServer <- function(id, r){
     ns <- session$ns
     
    output$gt_data_output <- shiny::renderUI({
-     req(r$viz_gt)
-     gt_terms <- get_gt_terms(r$viz_gt)
-     shiny::tagList(
-       select_input_with_tooltip(ns("gt_term_select"), "Select Term", 
-                               icon_info = "Select a term from the group terms network that you would like to see posts on.",
-                               choice_list = gt_terms, multiple_selections = TRUE),
-       DT::dataTableOutput(ns("gt_data_display")) 
-     )
+     DT::dataTableOutput(ns("gt_data_display"))
    })
    
    shiny::observe({
-     req(input$gt_term_select)
+     shiny::req(isTruthy(r$viz_gt))
      print("making table")
-     r$gt_table <- create_terms_table(viz_terms = input$gt_term_select, df = r$df, group_var = r$gt_group_var, message_var = r$text_var)
+     gt_terms <- get_gt_terms(r$viz_gt)
+     r$gt_table <- create_terms_table(terms = gt_terms, df = r$df, group_var = r$gt_group_var, message_var = r$text_var)
+     # r$gt_table <- create_terms_table(viz_terms = input$gt_term_select, df = r$df, group_var = r$gt_group_var, message_var = r$text_var)
      message(class(r$gt_table))
    })
    
    output$gt_data_display <- DT::renderDataTable({
-     req(r$viz_gt, r$gt_table)
-     datatable_display_app(r$gt_table)
+     req(r$gt_table)
+     r$gt_table %>%
+       collect() %>%
+       mutate(Term = as.factor(Term),
+              Group = as.factor(Group)) %>%
+       datatable_display_app()
    })
     
   })

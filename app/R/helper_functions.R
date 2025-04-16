@@ -107,10 +107,10 @@ bigram_pairs <- function(bigram_output, df, message_var){
   bigram_pairs <- paste(bigram_output$word1, bigram_output$word2, sep = " ")
   bigram_df <- purrr::map_dfr(bigram_pairs, function(bigram_pairs) {
     df %>%
-      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(bigram_pairs, ignore_case = TRUE))) %>%
+      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(bigram_pairs, ignore_case = FALSE))) %>%
       dplyr::mutate(bigram_pairs = bigram_pairs) %>%
       dplyr::select(bigram_pairs, message_var, clean_text) %>%
-      dplyr::mutate(bigram_pairs = as.factor(bigram_pairs))
+      collect()
   })
     
   
@@ -173,19 +173,14 @@ datatable_display_app <- function(df){
 }
 
 # Group Terms Functions ----
-create_group_terms_table_opt <- function(graph_obj, df, group_var){
+create_terms_table <- function(terms, df, group_var, message_var){
   
-  graph_data <- graph_obj$data
-  group_term_node_size <- sort(graph_data$size, decreasing = T)[1]
-  group_terms <- graph_data[graph_data$size == group_term_node_size, ][["node_name"]]
-  
-  graph_terms <- graph_data[!graph_data$node_name %in% group_terms,][["node_name"]]
-  
-  df_table <- purrr::map_dfr(graph_terms, function(term){
-    df_term <- df[grep(term, df$clean_text, fixed = T),]
-    df_term$Term <- term
-    df_term <- df_term[c(as.factor(Term), as.factor(group_var), Message)]
-    return(df_term)
+  df_table <- purrr::map_dfr(terms, function(term){
+    df %>%
+      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
+      dplyr::mutate(Term = term) %>%
+      dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
+      collect()
   }) 
   
   return(df_table)
@@ -224,7 +219,7 @@ get_wlo_terms <- function(wlo_view){
 
 # create tables ----
 
-create_terms_table <- function(viz_terms, df, group_var, message_var){
+create_terms_table_legacy<- function(viz_terms, df, group_var, message_var){
   
   df_table <- purrr::map_dfr(viz_terms, function(term){
     df_term <- df[grep(term, df$clean_text, fixed = T),]
@@ -238,4 +233,66 @@ create_terms_table <- function(viz_terms, df, group_var, message_var){
   return(df_table)
 }
 
-# ----
+#  duckdb ----
+
+make_duckdb <- function(df, con, name){
+  duckdb::dbWriteTable(
+    conn = con,
+    name = name,
+    df,
+    overwrite = TRUE
+  )
+}
+
+# cleaning ----
+clean_df <- function(df, message_var, duckdb = F){
+  
+  df <- df %>%
+    mutate(clean_text = message_var) %>%
+    ParseR::clean_text(
+      text_var = clean_text,
+      tolower = T, # should make some of this customisable
+      remove_mentions = T,
+      remove_punctuation = T,
+      remove_digits = T,
+      in_parallel = F # be aware if we are deploying this - does this work with duckdb?
+    ) 
+  
+  if (duckdb){
+    df <- df %>%
+      collect() %>%
+      mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
+      LimpiaR::limpiar_spaces(clean_text)
+  } else {
+    df <- df %>%
+      mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
+      LimpiaR::limpiar_spaces(clean_text)
+  }
+  
+  return(df)
+}
+
+# popups ----
+file_size_logic <- function(file){
+  
+  if (file){
+    shiny::showModal(shiny::modalDialog(
+      title = "Select a Column",
+      select_input_with_tooltip(id = ns("text_column"), title = "Text Column*",
+                                icon_info = "The name of the column with the text you want to analyse",
+                                choice_list = colnames(master_df)),
+      select_input_with_tooltip(id = ns("author_column"), title = "Author Column*",
+                                icon_info = "The name of the author column",
+                                choice_list = colnames(master_df)),
+      select_input_with_tooltip(id = ns("date_column"), title = "Date Column*",
+                                icon_info = "The name of the date column",
+                                choice_list = colnames(master_df)),
+      footer = shiny::actionButton(ns("confirm_text_col"), "Go!")
+    ))
+  } else {
+    shinyalert::shinyalert("File must have less than 50k rows.",
+                           closeOnEsc = TRUE,
+                           closeOnClickOutside = FALSE,
+                           type = "warning")
+  }
+}
