@@ -54,7 +54,7 @@ groupTermsVizServer <- function(id, r){
       }
       
       r$viz_gt <- ParseR::viz_group_terms_network(
-        data = collect(r$df),
+        data = dplyr::collect(r$df),
         group_var = !!rlang::sym(r$gt_group_var),
         # text_var = !!rlang::sym(r$text_var),
         text_var = clean_text,
@@ -114,8 +114,8 @@ groupTermsDataServer <- function(id, r){
    output$gt_data_display <- DT::renderDataTable({
      req(r$gt_table)
      r$gt_table %>%
-       collect() %>%
-       mutate(Term = as.factor(Term),
+       dplyr::collect() %>%
+       dplyr::mutate(Term = as.factor(Term),
               Group = as.factor(Group)) %>%
        datatable_display_app()
    })

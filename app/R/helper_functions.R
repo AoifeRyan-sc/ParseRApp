@@ -110,7 +110,7 @@ bigram_pairs <- function(bigram_output, df, message_var){
       dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(bigram_pairs, ignore_case = FALSE))) %>%
       dplyr::mutate(bigram_pairs = bigram_pairs) %>%
       dplyr::select(bigram_pairs, message_var, clean_text) %>%
-      collect()
+      dplyr::collect()
   })
     
   
@@ -180,7 +180,7 @@ create_terms_table <- function(terms, df, group_var, message_var){
       dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
       dplyr::mutate(Term = term) %>%
       dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
-      collect()
+      dplyr::collect()
   }) 
   
   return(df_table)
@@ -248,7 +248,7 @@ make_duckdb <- function(df, con, name){
 clean_df <- function(df, message_var, duckdb = F){
   
   df <- df %>%
-    mutate(clean_text = message_var) %>%
+    dplyr::mutate(clean_text = message_var) %>%
     ParseR::clean_text(
       text_var = clean_text,
       tolower = T, # should make some of this customisable
@@ -260,12 +260,12 @@ clean_df <- function(df, message_var, duckdb = F){
   
   if (duckdb){
     df <- df %>%
-      collect() %>%
-      mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
+      dplyr::collect() %>%
+      dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
       LimpiaR::limpiar_spaces(clean_text)
   } else {
     df <- df %>%
-      mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
+      dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
       LimpiaR::limpiar_spaces(clean_text)
   }
   
@@ -300,7 +300,7 @@ file_size_logic <- function(file, df, ns){
 # top terms ----
 make_top_terms <- function(df, n_terms){
   
-  top_terms <- tmp_con %>% collect() %>%
+  top_terms <- tmp_con %>% dplyr::collect() %>%
     tidytext::unnest_tokens(output = word, input = clean_text, token = "words", to_lower = FALSE) %>%
     count(word) %>%
     slice_max(n = n_terms, order_by = n, with_ties = F)

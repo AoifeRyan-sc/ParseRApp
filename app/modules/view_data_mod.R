@@ -55,14 +55,14 @@ dataDisplayServer <- function(id, r){
 
       if (is.null(r$url_var)){
         r$df %>%
-          select(r$cols) %>%
+          dplyr::select(r$cols) %>%
           dplyr::collect() %>%
           DT::datatable(
             filter = "top"
           )
       } else {
         r$df %>%
-          select(r$cols) %>%
+          dplyr::select(r$cols) %>%
           dplyr::collect() %>%
           LimpiaR::limpiar_link_click(!!rlang::sym(r$url_var)) %>%
           DT::datatable(

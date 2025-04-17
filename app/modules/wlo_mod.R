@@ -41,7 +41,7 @@ wloVizServer <- function(id, r){
       r$wlo_group_var <- input$wlo_group_column
       
       r$viz_wlo <- ParseR::calculate_wlos(
-        df = collect(r$df),
+        df = dplyr::collect(r$df),
         text_var = clean_text,
         topic_var = !!rlang::sym(r$wlo_group_var),
         top_n = 30,
@@ -95,8 +95,8 @@ wloDataServer <- function(id, r){
     output$wlo_data_display <- DT::renderDataTable({
       req(r$wlo_table)
       r$wlo_table %>% 
-        collect() %>%
-        mutate(Term = as.factor(Term),
+        dplyr::collect() %>%
+        dplyr::mutate(Term = as.factor(Term),
                Group = as.factor(Group)) %>%
         datatable_display_app()
     })
