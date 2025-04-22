@@ -12,7 +12,10 @@ RoxygenNote: 7.3.2
 Imports: 
     bsicons,
     bslib,
+    dbplyr,
+    dplyr,
     DT,
+    duckplyr,
     htmlwidgets,
     LimpiaR,
     ParseR,
