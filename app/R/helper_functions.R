@@ -144,7 +144,9 @@ bigram_pairs_wip <-function(bigram_output, df, message_var){
 
 # Personalised functions ----
 count_ngram_app <- function(df, text_var, top_n, min_freq){
-  ParseR::count_ngram(
+  print("starting count_ngram")
+  ngram_data <- count_ngram_temp(
+  # ParseR::count_ngram(
     df = df,
     text_var = {{text_var}},
     top_n = top_n,
@@ -155,6 +157,8 @@ count_ngram_app <- function(df, text_var, top_n, min_freq){
     mentions = FALSE, # will set to true later, this is for iteration speed
     distinct = FALSE # will set to true later, this is for iteration speed
   )
+  print("finishing count_ngram")
+  return(ngram_data)
 }
 
 datatable_display_app <- function(df){
@@ -309,4 +313,139 @@ make_top_terms <- function(df, n_terms){
 
 viz_top_terms <- function(top_terms){
   
+}
+
+#' Generate counts for the most frequent n-grams in text.
+#'
+#' Function returns a list with a viz and a view object. The viz object can be fed into ParseR's `viz_ngram` function to produce a network visualisation.
+#'
+#' @param df A dataframe.
+#' @param text_var The variable containing the text.
+#' @param n The number of terms to include in the n-gram. E.g. 2 produces a bi-gram.
+#' @param top_n The number of n-grams to include.
+#' @param min_freq The minimum number of times an n-gram must be observed to be included.
+#' @param distinct If TRUE, will count # of unique posts for each n-gram.
+#' @param hashtags Should hashtags be included in the n-grams?
+#' @param mentions Should mentions be included in the n-grams?
+#' @param clean_text Should the text variable be cleaned?
+#' @param remove_stops Should stopwords be removed?
+#' @param tolower Should all tokens be lower cased in calls to unnest_tokens?
+#' @param ... fed to the `ParseR::clean_text()` function
+#'
+#' @return A list containing a summary table and a tidygraph object suitable for a network visualisation.
+#' @usage count_ngram(
+#'  df,
+#'  text_var = Message,
+#'  n = 2,
+#'  top_n = 50,
+#'  min_freq = 10,
+#'  distinct = FALSE,
+#'  hashtags = FALSE,
+#'  mentions = FALSE,
+#'  clean_text  = FALSE,
+#'  remove_stops = TRUE,
+#'  tolower = TRUE, 
+#'  ...
+#' )
+#' @importFrom magrittr "%>%"
+#' @export
+count_ngram_temp <- function(df,
+                        text_var = Message,
+                        n = 2,
+                        top_n = 50,
+                        min_freq = 10,
+                        distinct = FALSE,
+                        hashtags = FALSE,
+                        mentions = FALSE,
+                        clean_text = FALSE,
+                        remove_stops = TRUE,
+                        tolower = TRUE,
+                        ...) {
+  
+  
+  # Tidy evaluate supplied text variable
+  text_quo <- rlang::enquo(text_var)
+  text_sym <- rlang::ensym(text_var)
+  
+  # Loading the new stop words list
+  stopwords <- ParseR::stopwords
+  
+  # use ParseR's clean_text function if the user asks
+  if (clean_text) {
+    clean_df <- df %>%
+      ParseR::clean_text(text_var = !!text_sym, ...) %>%
+      dplyr::select(!!text_sym) %>%
+      dplyr::mutate(.document = dplyr::row_number()) # add a document ID column for distinct
+  } else {
+    clean_df <- df %>% dplyr::select(!!text_sym) %>%  #keep the only column we need
+      dplyr::mutate(.document = dplyr::row_number()) # add a document ID column for distinct
+  }
+  
+  
+  
+  # Avoid any NA strings
+  clean_df <- clean_df %>%
+    dplyr::filter(!is.na(!!text_sym))
+  
+  # Make edges df
+  ngrams <- clean_df %>%
+    tidytext::unnest_tokens(ngram,
+                            !!text_sym,
+                            token = "ngrams",
+                            n = n,
+                            format = "text",
+                            to_lower = tolower
+    ) %>%
+    dplyr::filter(!is.na(ngram)) # Make sure no NA values here or tidygraph will fail later
+  
+  word_names <- paste0("word", 1:n)
+  
+  # Separate the unnested ngrams into n (length of n-gram)columns
+  edges_df <- ngrams %>%
+    tidyr::separate_wider_delim(ngram, " ", names = word_names)
+  
+  if(remove_stops) {
+    edges_df <- edges_df %>%
+      dplyr::filter_at(.vars = word_names, ~ !. %in% stopwords$stopwords & !is.na(.)) 
+  }
+  
+  # Remove copies
+  if (distinct) {
+    edges_df <- edges_df %>% dplyr::distinct()
+  }
+  
+  edges_df <- edges_df %>%
+    dplyr::count(!!!dplyr::syms(word_names), sort = TRUE, name = "ngram_freq") %>%
+    dplyr::filter(ngram_freq >= min_freq) %>%
+    dplyr::slice_max(n = top_n, order_by = ngram_freq)
+  
+  # Get all ngrams
+  ngram_words <- edges_df %>%
+    dplyr::select(-ngram_freq) %>%
+    unlist() %>%
+    unique()
+  
+  # Builds nodes df (single words) 
+  nodes_df <- clean_df %>%
+    tidytext::unnest_tokens(word, !!text_sym, token = "words", format = "text", to_lower = tolower)
+  
+  if (distinct) {
+    nodes_df <- nodes_df %>% dplyr::distinct()
+  }
+  
+  if (remove_stops) {
+    nodes_df <- nodes_df %>%
+      dplyr::filter(!word %in% stopwords$stopwords)
+  }
+  
+  nodes_df <- nodes_df %>%
+    dplyr::filter(!is.na(word)) %>%
+    dplyr::count(word, sort = TRUE, name = "word_freq") %>%
+    dplyr::filter(word %in% ngram_words)
+  
+  # Join together for output
+  tidy_ngram <- tidygraph::tbl_graph(nodes = nodes_df, edges = edges_df)
+  
+  # Output list
+  return(list("viz" = tidy_ngram, "view" = edges_df))
 }

@@ -40,8 +40,6 @@ bigramVizServer <- function(id, r){
       r$bigram <- NULL
       r$n_bigrams <- NULL
       
-      message("creating bigram")
-      
       if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
         r$bigram <- r$df %>%
           dplyr::collect() %>%
@@ -56,8 +54,6 @@ bigramVizServer <- function(id, r){
       }
       
       r$bigram_calculated <- TRUE
-      
-      message("creating layout")
       
       if (r$n_bigrams > 1){
         lapply(seq_along(r$bigram), function(i) {
@@ -113,12 +109,14 @@ bigramDataServer <- function(id, r){
     
     shiny::observeEvent(r$bigram_calculated, {
       shiny::req(isTruthy(r$bigram_calculated))
-
+      
       if (r$n_bigrams > 1){
         req(r$bigram)
+        
         r$bigram_table <- lapply(seq_along(r$bigram), function(i){
           bigram_pairs(r$bigram[[i]]$view, r$df, r$text_var)
         })
+        
         names(r$bigram_table) <- names(r$bigram)
         
         lapply(seq_along(r$bigram_table), function(i) {
@@ -140,7 +138,9 @@ bigramDataServer <- function(id, r){
             dplyr::mutate(bigram_pairs = as.factor(bigram_pairs)) %>%
             datatable_display_app()
         })
+        
       } # create tables and ui layout
+      
 
     }) # create bigram tables and ui layout
     
