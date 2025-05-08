@@ -20,10 +20,16 @@ dataUploadServer <- function(id, r){
     ns <- session$ns
     
     output$file_upload_display <- renderUI({
-      shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) # add some widgets?  
-    }) # fileInput display
+      shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) 
+    }) # default fileInput display
     
     shiny::observeEvent(input$file_upload, {
+      
+      num_reactives <- length(names(r))
+  
+      for (name in names(r)) {
+        r[[name]] <- NULL
+      } # reset reactives
       
       ext <- tools::file_ext(input$file_upload$datapath)
       file_path <- input$file_upload$datapath
@@ -52,7 +58,7 @@ dataUploadServer <- function(id, r){
         make_duckdb(df = master_df, con = r$con, name = "master_df")
         r$df <- dplyr::tbl(r$con, "master_df")
         
-      }
+      } # what to do after data upload
       
     }) # deal with uploaded file
     
