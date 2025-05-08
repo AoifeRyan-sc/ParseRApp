@@ -31,7 +31,7 @@ bigramVizServer <- function(id, r){
     
     shiny::observe({
       shiny::req(r$df)
-      shiny::updateSelectizeInput(session = session, "bigram_group_column", choices = c("No Group Variable" = "none", colnames(r$df)), selected = NULL)
+      shiny::updateSelectizeInput(session = session, "bigram_group_column", choices = c("No Group Variable" = "none", colnames(r$df)), selected = "none")
     }) # update select input
     
     shiny::observeEvent(input$bigram_action, {

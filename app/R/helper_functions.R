@@ -117,34 +117,8 @@ bigram_pairs <- function(bigram_output, df, message_var){
   return(bigram_df)
 }
 
-bigram_pairs_wip <-function(bigram_output, df, message_var){
-  
-  bigram_pairs <- paste(bigram_output$word1, bigram_output$word2, sep = " ")
-  bigram_df <- purrr::map_dfr(bigram_pairs, function(bigram_pair) {
-    df_filtered <- df[grep(bigram_pair, df$clean_text, fixed = T),]
-    if (nrow(df_filtered) > 0){
-      print(class(bigram_pair))
-      print(bigram_pair)
-      df_filtered$bigram_pair <- as.factor(bigram_pair)
-    } 
-    
-    df_filtered <- df_filtered[c("bigram_pair", message_var, "clean_text")]
-    print("0 rows")
-    
-    # 
-    # df_filtered$bigram_pair <- as.factor(df_filtered$bigram_pair)
-    return(df_filtered)
-  })
-  
-  
-  return(bigram_df)
-  # return(bigram_pairs)
-}
-
-
 # Personalised functions ----
 count_ngram_app <- function(df, text_var, top_n, min_freq){
-  print("starting count_ngram")
   ngram_data <- count_ngram_temp(
   # ParseR::count_ngram(
     df = df,
@@ -157,7 +131,6 @@ count_ngram_app <- function(df, text_var, top_n, min_freq){
     mentions = FALSE, # will set to true later, this is for iteration speed
     distinct = FALSE # will set to true later, this is for iteration speed
   )
-  print("finishing count_ngram")
   return(ngram_data)
 }
 

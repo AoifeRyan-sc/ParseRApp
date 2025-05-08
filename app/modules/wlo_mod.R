@@ -89,7 +89,6 @@ wloDataServer <- function(id, r){
       req(r$viz_wlo)
       wlo_terms <- get_wlo_terms(r$viz_wlo$view)
       r$wlo_table <- create_terms_table(wlo_terms, r$df, r$wlo_group_var, r$text_var)
-      print(head(r$wlo_table))
     })
     
     output$wlo_data_display <- DT::renderDataTable({
