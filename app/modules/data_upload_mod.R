@@ -25,43 +25,29 @@ dataUploadServer <- function(id, r){
     
     shiny::observeEvent(input$file_upload, {
       
-      num_reactives <- length(names(r))
-  
-      for (name in names(r)) {
-        r[[name]] <- NULL
-      } # reset reactives
-      
-      ext <- tools::file_ext(input$file_upload$datapath)
-      file_path <- input$file_upload$datapath
-      
-      req(ext)
-      validate(need(ext %in% c("csv", "xlsx", "rds"), "Please upload a csv, xlsx, or rds file"))
-      
-      master_df <- switch(ext,
-                     csv = read.csv(input$file_upload$datapath),
-                     xlsx = readxl::read_xlsx(input$file_upload$datapath),
-                     rds = readRDS(input$file_upload$datapath)) # maybe should use duckdb to read data in too
+      clear_reactives(r)
+      r$file_path <- input$file_upload$datapath
+      load_data(r)
      
-      if (nrow(master_df) > 50000){
+      if (nrow(r$master_df) > 50000){
         r$df <- NULL # and maybe close connection?
         
-        file_size_logic(file = F, df = master_df, ns = ns)
+        file_size_logic(file = F, df = r$master_df, ns = ns)
         
         output$file_upload_display <- renderUI({
           shiny::fileInput(ns("file_upload"), label = NULL, multiple = FALSE) # add some widgets?
         })
       } else {
         
-        file_size_logic(file = T, df = master_df, ns = ns)
+        file_size_logic(file = T, df = r$master_df, ns = ns)
         
         r$con <- duckdb::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
-        make_duckdb(df = master_df, con = r$con, name = "master_df")
+        make_duckdb(df = r$master_df, con = r$con, name = "master_df")
         r$df <- dplyr::tbl(r$con, "master_df")
         
       } # what to do after data upload
       
     }) # deal with uploaded file
-    
   
     # shiny::observeEvent(input$file_upload, {
     #   message("sapplying")
@@ -77,14 +63,19 @@ dataUploadServer <- function(id, r){
     }) # logic for conditional panel in ui
     shiny::outputOptions(output, "file_uploaded", suspendWhenHidden = FALSE)
 
-    shiny::observeEvent(input$confirm_text_col, { # should this be done in a separate session? Am I just inviting problems if we try to put it on docker or anything
-      shiny::removeModal()
+    shiny::observeEvent(input$confirm_input_cols, { 
       
-      shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+      shiny::removeModal()
       
       r$text_var <- input$text_column
       r$date_var <- input$date_column
       r$sender_var <- input$author_column
+      
+      if (!tolower(r$text_var) %in% c("text", "message")){
+        message_col_check(message_var = r$text_var, ns = ns)
+      }
+      
+      shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
       
       df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
       
@@ -95,7 +86,11 @@ dataUploadServer <- function(id, r){
       shiny::showNotification("Text cleaning completed!", type = "message")
     }) # clean text - maybe need to change
     
-    
+    shiny::observeEvent(input$change_text_col, {
+      message("triggered")
+      shiny::removeModal()
+      # file_size_logic(file = T, df = master_df, ns = ns)
+    })
   })
   
 }

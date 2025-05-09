@@ -33,7 +33,6 @@ dataDisplayServer <- function(id, r){
       shiny::updateSelectizeInput(session = session, "display_columns", choices = colnames(r$df), selected = NULL)
     })
     
-    # observeEvent(input$update_table, {
     shiny::observe({
       req(r$df)
       r$cols <- if (is.null(input$display_columns)){

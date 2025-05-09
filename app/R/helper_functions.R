@@ -264,7 +264,7 @@ file_size_logic <- function(file, df, ns){
       select_input_with_tooltip(id = ns("date_column"), title = "Date Column*",
                                 icon_info = "The name of the date column",
                                 choice_list = colnames(df)),
-      footer = shiny::actionButton(ns("confirm_text_col"), "Go!")
+      footer = shiny::actionButton(ns("confirm_input_cols"), "Go!")
     ))
   } else {
     shinyalert::shinyalert("File must have less than 50k rows.",
@@ -272,6 +272,13 @@ file_size_logic <- function(file, df, ns){
                            closeOnClickOutside = FALSE,
                            type = "warning")
   }
+}
+
+message_col_check <- function(message_var, ns){
+  shiny::showModal(shiny::modalDialog(
+    title = "Select a Column",
+    footer = shiny::actionButton(ns("change_text_col"), "Go!")
+  ))
 }
 
 # top terms ----
@@ -421,4 +428,25 @@ count_ngram_temp <- function(df,
   
   # Output list
   return(list("viz" = tidy_ngram, "view" = edges_df))
+}
+
+
+clear_reactives <- function(r){
+  num_reactives <- length(names(r))
+  
+  for (name in names(r)) {
+    r[[name]] <- NULL
+  }
+}
+
+load_data <- function(r){
+  
+  ext <- tools::file_ext(r$file_path)
+  
+  validate(need(ext %in% c("csv", "xlsx", "rds"), "Please upload a csv, xlsx, or rds file"))
+  
+  r$master_df <- switch(ext,
+                      csv = read.csv(r$file_path),
+                      xlsx = readxl::read_xlsx(r$file_path),
+                      rds = readRDS(r$file_path)) # maybe should use duckdb to read data in too
 }
