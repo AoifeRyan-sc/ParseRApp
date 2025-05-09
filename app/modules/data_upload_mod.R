@@ -10,7 +10,9 @@ dataUploadUi <- function(id){
       bslib::accordion_panel(
         "Upload File",
         shiny::uiOutput(ns("file_upload_display"))
-      )
+      ),
+      shiny::br(),
+      shiny::uiOutput(ns("change_columns_button"))
   )
   )
 }
@@ -71,10 +73,6 @@ dataUploadServer <- function(id, r){
       r$date_var <- input$date_column
       r$sender_var <- input$author_column
       
-      if (!tolower(r$text_var) %in% c("text", "message")){
-        message_col_check(message_var = r$text_var, ns = ns)
-      }
-      
       shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
       
       df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
@@ -86,11 +84,18 @@ dataUploadServer <- function(id, r){
       shiny::showNotification("Text cleaning completed!", type = "message")
     }) # clean text - maybe need to change
     
-    shiny::observeEvent(input$change_text_col, {
-      message("triggered")
-      shiny::removeModal()
-      # file_size_logic(file = T, df = master_df, ns = ns)
+    output$change_columns_button <- shiny::renderUI({
+      req(r$text_var)
+      shiny::actionButton(ns("reset_columns"), 
+                          "Change Column Selections",
+                          icon = shiny::icon("arrow-rotate-right", lib = "font-awesome"),
+                          class = "btn-info")
     })
+    
+    shiny::observeEvent(input$reset_columns, {
+      file_size_logic(file = T, df = r$master_df, ns = ns)
+    })
+    
   })
   
 }
