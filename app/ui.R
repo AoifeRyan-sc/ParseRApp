@@ -1,19 +1,22 @@
-card3 <- bslib::card(
-  full_screen = TRUE,
-  bslib::card_header("Filling content"),
-  bslib::card_body(
-    class = "p-0",
-    shiny::plotOutput("p")
-  ),
-  style = bslib::css(
-    gap ="0.25rem",
-    resize = "horizontal"
-  ),
-  min_height = 500
-)
-
+# card3 <- bslib::card(
+#   full_screen = TRUE,
+#   bslib::card_header("Filling content"),
+#   bslib::card_body(
+#     class = "p-0",
+#     shiny::plotOutput("p")
+#   ),
+#   style = bslib::css(
+#     gap ="0.25rem",
+#     resize = "horizontal"
+#   ),
+#   min_height = 500
+# )
+# 
 ui <- bslib::page_sidebar(
   tags$style(HTML("g.hovertext > path {opacity: .8;}")),
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+  ),
 
   theme = bslib::bs_theme(
     bootswatch = "sandstone",

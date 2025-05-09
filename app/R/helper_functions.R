@@ -258,6 +258,7 @@ file_size_logic <- function(file, df, ns){
       select_input_with_tooltip(id = ns("text_column"), title = "Text Column*",
                                 icon_info = "The name of the column with the text you want to analyse",
                                 choice_list = colnames(df)),
+      shiny::uiOutput(ns("text_col_missing_error")),
       select_input_with_tooltip(id = ns("author_column"), title = "Author Column*",
                                 icon_info = "The name of the author column",
                                 choice_list = colnames(df)),

@@ -67,21 +67,42 @@ dataUploadServer <- function(id, r){
 
     shiny::observeEvent(input$confirm_input_cols, { 
       
-      shiny::removeModal()
+      if (shiny::isTruthy(input$text_column)){
+        print("not na")
+        shiny::removeModal()
+        
+        r$text_var <- input$text_column
+        r$date_var <- input$date_column
+        r$sender_var <- input$author_column
+        
+        shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+        
+        df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
+        
+        make_duckdb(df = df_clean, con = r$con, name = "master_df")
+        r$df <- dplyr::tbl(r$con, "master_df")
+        
+        shinybusy::remove_modal_spinner()
+        shiny::showNotification("Text cleaning completed!", type = "message")
+        } else {
+          print("is na")
+          output$text_col_missing_error <- shiny::renderUI({
+            shiny::div(
+              class = "error-container", 
+              bsicons::bs_icon("exclamation-circle-fill", class = "error-icon"),
+              shiny::div(id = "missing-selection-error", class = "error-message", 
+                         "Please select a text column")
+            )
+            # shiny::tagList(
+            #   htmltools::tags$head(
+            #     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+            #   ),
+            #   div(id = "missing-selection-error", class = "error-message", 
+            #       "Please select a text column", style = "display: none;")
+            # )
+          })
+        }
       
-      r$text_var <- input$text_column
-      r$date_var <- input$date_column
-      r$sender_var <- input$author_column
-      
-      shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
-      
-      df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
-      
-      make_duckdb(df = df_clean, con = r$con, name = "master_df")
-      r$df <- dplyr::tbl(r$con, "master_df")
-      
-      shinybusy::remove_modal_spinner()
-      shiny::showNotification("Text cleaning completed!", type = "message")
     }) # clean text - maybe need to change
     
     output$change_columns_button <- shiny::renderUI({
@@ -89,7 +110,8 @@ dataUploadServer <- function(id, r){
       shiny::actionButton(ns("reset_columns"), 
                           "Change Column Selections",
                           icon = shiny::icon("arrow-rotate-right", lib = "font-awesome"),
-                          class = "btn-info")
+                          # class = "btn-info"
+                          )
     })
     
     shiny::observeEvent(input$reset_columns, {

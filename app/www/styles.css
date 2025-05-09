@@ -1,0 +1,20 @@
+ .error-message {
+        color: #d9534f;
+        font-size: 0.9em;
+        margin-top: 5px;
+ }
+ 
+ .error-container {
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Space between icon and text */
+}
+
+.error-icon {
+  color: #d9534f; /* Same red color as the text */
+  font-size: 1.1em; /* Slightly larger than the text */
+}
+
+ .has-error .selectize-control .selectize-input {
+        border-color: #d9534f;
+ } /* need to implement this still
