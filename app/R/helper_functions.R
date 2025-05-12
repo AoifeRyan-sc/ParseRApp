@@ -95,7 +95,7 @@ get_wlo_terms <- function(wlo_view){
   wlo_terms <- unique(wlo_view$word)
   
   return(wlo_terms)
-}
+} # do I use this?
 
 #  duckdb ----
 
@@ -139,12 +139,66 @@ clean_df <- function(df, message_var, duckdb = F){
 # popups ----
 
 # top terms ----
-make_top_terms <- function(df, n_terms){
+make_top_terms <- function(df, n_terms, group = NULL){
   
-  top_terms <- tmp_con %>% dplyr::collect() %>%
-    tidytext::unnest_tokens(output = word, input = clean_text, token = "words", to_lower = FALSE) %>%
+  all_terms <- df %>% 
+    tidytext::unnest_tokens(output = word, input = clean_text, token = "words", to_lower = FALSE)
+  
+  if (!is.null(group)){
+    all_terms <- all_terms %>% group_by({{ group }})
+  }
+    
+  top_terms <- all_terms %>%
     count(word) %>%
-    slice_max(n = n_terms, order_by = n, with_ties = F)
+    slice_max(n = n_terms, order_by = n, with_ties = F) 
+    
+}
+
+viz_top_terms <- function(top_terms, type = c("lollipops", "bars"), group = NULL, nrow = 1){
+  type <- match.arg(type)
+  
+  plot <- top_terms %>%
+    dplyr::mutate(word = forcats::fct_reorder(word, n, .desc = F)) %>%
+    ggplot2::ggplot(ggplot2::aes(x = word, y = n))
+  
+  if (type == "lollipops"){
+    plot <- plot + 
+      ggplot2::geom_segment(ggplot2::aes(x = word, xend = word,
+                                         y = 0, yend = n),
+                            show.legend = FALSE) +
+      ggplot2::geom_point(size = 3,
+                          shape = 21,
+                          show.legend = FALSE)
+  } else {
+    plot <- plot + ggplot2::geom_col(show.legend = F)
+  }
+  
+  if (!is.null(group)){
+    plot <- plot +
+      ggplot2::facet_wrap({{ group }},
+                          scales = "free",
+                          labeller = ggplot2::label_both,
+                          nrow = nrow)
+  }
+  
+  plot <- plot +
+    ggplot2::coord_flip() +
+    tidytext::scale_x_reordered("Term") +
+    ggplot2::scale_y_continuous(
+      # ggplot will render the beta symbol appropriately
+      name = expression(paste("Probability term belongs to topic (", beta, ")")
+      )) +
+    # ggplot2::scale_y_continuous("Probability term belongs to topic (beta)") +
+    # ggplot2::scale_fill_manual(values = as.vector(.ms_palette(30))) +
+    # ggplot2::scale_colour_manual(values = as.vector(.ms_palette(30))) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(title = ggplot2::element_text(size = 16),
+                   text = ggplot2::element_text(size = 10),
+                   strip.text = ggplot2::element_text(size = 14),
+                   axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5),
+                   axis.title.x = ggplot2::element_text(size = 14))
+  
+  return(plot)
     
 }
 

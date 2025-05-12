@@ -17,4 +17,6 @@ server <- function(input, output, session) {
   wloVizServer("wlo_viz_card", r)
   wloDataServer("wlo_data_card", r)
   valueBoxServer("value_box_panel", r)
+  topTermsVizServer("top_terms_viz_card", r)
+  topTermsDataServer("top_terms_data_card", r)
 }

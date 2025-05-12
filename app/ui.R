@@ -53,8 +53,14 @@ ui <- bslib::page_sidebar(
     width = 1/2,
     heights_equal = "row",
     wloVizUi("wlo_viz_card"),
-    wloDataUi("wlo_data_card"),
+    wloDataUi("wlo_data_card")
   ),
+  bslib::layout_column_wrap(
+    width = 1/2,
+    heights_equal = "row",
+    topTermsVizUi("top_terms_viz_card"),
+    topTermsDataUi("top_terms_data_card")
+  )
   )
 )
 

@@ -42,22 +42,17 @@ topTermsVizServer <- function(id, r){
         r$viz_top_terms <- NULL
         r$top_terms_group_var <- input$top_terms_group_column
         
-        r$viz_wlo <- make_stop_terms(
+        r$viz_top_terms <- make_top_terms(
           df = collect(r$df),
-          text_var = clean_text,
-          topic_var = !!rlang::sym(r$wlo_group_var),
-          top_n = 30,
-          filter_by = input$wlo_filter,
-          top_terms_cutoff = 500,
-          nrow = input$wlo_n_rows
+          n_terms = input$top_terms_top_n
         )
       }
       
     })
     
-    output$wlo_viz <- shiny::renderPlot({
-      req(r$viz_wlo)
-      r$viz_wlo
+    output$top_terms_viz <- shiny::renderPlot({
+      req(r$viz_top_terms)
+      r$viz_top_terms
     })
     
     
@@ -69,10 +64,10 @@ topTermsDataUi <- function(id){
   ns <- shiny::NS(id)
   bslib::card(
     bslib::card_header(
-      shiny::HTML("Weighted Log Odds Data")),
+      shiny::HTML("Top Terms Data")),
     bslib::card_body(
       shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("wlo_data_output"))
+        shiny::uiOutput(ns("top_terms_data_output"))
       )
     ),
     full_screen = TRUE,
@@ -84,21 +79,21 @@ topTermsDataServer <- function(id, r){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$wlo_data_output <- shiny::renderUI({
-      req(r$viz_wlo)
-      DT::dataTableOutput(ns("wlo_data_display")) 
+    output$top_terms_data_output <- shiny::renderUI({
+      req(r$viz_top_terms)
+      DT::dataTableOutput(ns("top_terms_data_display")) 
     })
     
     shiny::observe({
-      req(r$viz_wlo)
-      wlo_terms <- get_wlo_terms(r$viz_wlo$view)
-      r$wlo_table <- create_terms_table(wlo_terms, r$df, r$wlo_group_var, r$text_var)
-      print(head(r$wlo_table))
+      req(r$viz_top_terms)
+      top_terms_terms <- get_top_terms_terms(r$viz_top_terms$view)
+      r$top_terms_table <- create_terms_table(top_terms_terms, r$df, r$top_terms_group_var, r$text_var)
+      print(head(r$top_terms_table))
     })
     
-    output$wlo_data_display <- DT::renderDataTable({
-      req(r$wlo_table)
-      r$wlo_table %>% 
+    output$top_terms_data_display <- DT::renderDataTable({
+      req(r$top_terms_table)
+      r$top_terms_table %>% 
         collect() %>%
         mutate(Term = as.factor(Term),
                Group = as.factor(Group)) %>%

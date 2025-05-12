@@ -11,6 +11,7 @@ source("modules/view_data_mod.R")
 source("modules/bigrams_mod.R")
 source("modules/group_terms_mod.R")
 source("modules/wlo_mod.R")
+source("modules/top_terms_mod.R")
 source("modules/value_box_mod.R")
 
 source("R/helper_functions.R")
