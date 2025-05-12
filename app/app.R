@@ -26,6 +26,7 @@ source(here("app/modules/wlo_mod.R"))
 source(here("app/modules/value_box_mod.R"))
 
 source(here("app/R/helper_functions.R"))
+source(here("app/R/ui_component_functions.R"))
 
 # Source App Files
 source(here("app/ui.R"))

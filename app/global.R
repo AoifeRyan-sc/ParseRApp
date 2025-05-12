@@ -14,3 +14,4 @@ source("modules/wlo_mod.R")
 source("modules/value_box_mod.R")
 
 source("R/helper_functions.R")
+source("R/ui_component_functions.R")

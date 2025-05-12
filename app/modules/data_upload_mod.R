@@ -75,35 +75,51 @@ dataUploadServer <- function(id, r){
         r$date_var <- input$date_column
         r$sender_var <- input$author_column
         
-        shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
-        
-        df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
-        
-        make_duckdb(df = df_clean, con = r$con, name = "master_df")
-        r$df <- dplyr::tbl(r$con, "master_df")
-        
-        shinybusy::remove_modal_spinner()
-        shiny::showNotification("Text cleaning completed!", type = "message")
+        if (!tolower(r$text_var) %in% c("message", "text")){
+          message_col_check(message_var = r$text_var, ns = ns)
+        } else {
+          shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+          
+          df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
+          
+          make_duckdb(df = df_clean, con = r$con, name = "master_df")
+          r$df <- dplyr::tbl(r$con, "master_df")
+          
+          shinybusy::remove_modal_spinner()
+          shiny::showNotification("Text cleaning completed!", type = "message")
+        }
+      
         } else {
           print("is na")
           output$text_col_missing_error <- shiny::renderUI({
-            shiny::div(
-              class = "error-container", 
-              bsicons::bs_icon("exclamation-circle-fill", class = "error-icon"),
-              shiny::div(id = "missing-selection-error", class = "error-message", 
-                         "Please select a text column")
-            )
-            # shiny::tagList(
-            #   htmltools::tags$head(
-            #     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
-            #   ),
-            #   div(id = "missing-selection-error", class = "error-message", 
-            #       "Please select a text column", style = "display: none;")
-            # )
+            missing_input_error("missing-selection-error", "Please select a text column")
           })
         }
       
     }) # clean text - maybe need to change
+    
+    shiny::observeEvent(input$confirm_message_col , {
+      
+      shiny::removeModal()
+      
+      r$text_var <- input$text_column
+      r$date_var <- input$date_column
+      r$sender_var <- input$author_column
+      
+      shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+      
+      df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
+      
+      make_duckdb(df = df_clean, con = r$con, name = "master_df")
+      r$df <- dplyr::tbl(r$con, "master_df")
+      
+      shinybusy::remove_modal_spinner()
+      shiny::showNotification("Text cleaning completed!", type = "message")
+    })
+    
+    shiny::observeEvent(input$reselect_message_var, {
+      file_size_logic(file = T, df = r$master_df, ns = ns)
+    })
     
     output$change_columns_button <- shiny::renderUI({
       req(r$text_var)
@@ -117,6 +133,7 @@ dataUploadServer <- function(id, r){
     shiny::observeEvent(input$reset_columns, {
       file_size_logic(file = T, df = r$master_df, ns = ns)
     })
+    
     
   })
   

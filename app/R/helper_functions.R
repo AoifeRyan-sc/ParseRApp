@@ -1,85 +1,14 @@
-# tooltip layouts ----
-select_input_with_tooltip <- function(id, title, icon_info, choice_list = list(), select = NULL, multiple_selections = FALSE){
+create_terms_table <- function(terms, df, group_var, message_var){
   
-  if (is.null(select)){
-    select_widget <- shiny::selectizeInput(
-      id, title, choices = choice_list, 
-      multiple = multiple_selections,
-      options = list(
-        placeholder = 'Please select an option below',
-        onInitialize = I('function() { this.setValue(""); }')
-      ))
-  } else {
-    select_widget <- shiny::selectizeInput(
-      id, title, choices = choice_list, 
-      multiple = multiple_selections,
-      selected = select)
-  }
-
-  shiny::div(
-    style = "position: relative",
-    select_widget,
-    shiny::div(
-      style = "position: absolute; top: 0; right: 5px;",
-      bslib::tooltip(
-        bsicons::bs_icon("question-circle-fill"),
-        icon_info
-      )
-    )
-  )
-}
-
-numeric_input_with_tooltip <- function(id, title, default_value, icon_info){
+  df_table <- purrr::map_dfr(terms, function(term){
+    df %>%
+      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
+      dplyr::mutate(Term = term) %>%
+      dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
+      dplyr::collect()
+  }) 
   
-  shiny::div(
-    style = "position: relative",
-    shiny::numericInput(id, title, value = default_value),
-    shiny::div(
-      style = "position: absolute; top: 0; right: 5px;",
-      bslib::tooltip(
-        bsicons::bs_icon("question-circle-fill"),
-        icon_info
-      )
-    )
-  )
-}
-
-text_input_with_tooltip <- function(id, title, icon_info, placeholder = NULL, value = NULL){
-  
-  shiny::div(
-    style = "position: relative",
-    shiny::textInput(id, title, placeholder = placeholder, value = value),
-    shiny::div(
-      style = "position: absolute; top: 0; right: 5px;",
-      bslib::tooltip(
-        bsicons::bs_icon("question-circle-fill"),
-        icon_info
-      )
-    )
-  )
-}
-
-dropdownButton_with_tooltip <- function(..., dropdown_title, icon_info){
-  shiny::div(
-    style = "position: absolute; top: 3px; right: 15px;",
-    bslib::tooltip(
-      shinyWidgets::dropdownButton(
-        shiny::tags$h3(dropdown_title),
-        circle = TRUE,
-        size = "sm",
-        icon = shiny::icon("gear"),
-        width = "200px",
-        status = "primary",
-        tags$style(HTML("
-          .dropdown-toggle::after {
-            display: none !important;
-          }
-        ")),
-        ...
-      ),
-      icon_info
-    )
-  )
+  return(df_table)
 }
 
 # Text processing ----
@@ -148,20 +77,7 @@ datatable_display_app <- function(df){
     )
   )
 }
-
 # Group Terms Functions ----
-create_terms_table <- function(terms, df, group_var, message_var){
-  
-  df_table <- purrr::map_dfr(terms, function(term){
-    df %>%
-      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
-      dplyr::mutate(Term = term) %>%
-      dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
-      dplyr::collect()
-  }) 
-  
-  return(df_table)
-}
 
 get_gt_terms <- function(graph_obj){
   
@@ -173,41 +89,12 @@ get_gt_terms <- function(graph_obj){
   return(graph_terms)
 }
 
-create_group_terms_table <- function(graph_terms, df, group_var){
-
-  df_table <- purrr::map_dfr(graph_terms, function(term){
-    df_term <- df[grep(term, df$clean_text, fixed = T),]
-    df_term$Term <- term
-    df_term <- df_term[c("Term", group_var, "Message")]
-    df_term$Term <- as.factor(df_term$Term)
-    df_term[[group_var]] <- as.factor(df_term[[group_var]])
-    return(df_term)
-  }) 
-  
-}
-
 # wlo functions -----
 get_wlo_terms <- function(wlo_view){
 
   wlo_terms <- unique(wlo_view$word)
   
   return(wlo_terms)
-}
-
-# create tables ----
-
-create_terms_table_legacy<- function(viz_terms, df, group_var, message_var){
-  
-  df_table <- purrr::map_dfr(viz_terms, function(term){
-    df_term <- df[grep(term, df$clean_text, fixed = T),]
-    df_term$Term <- term
-    df_term <- df_term[c("Term", group_var, message_var)]
-    df_term$Term <- as.factor(df_term$Term)
-    df_term[[group_var]] <- as.factor(df_term[[group_var]])
-    return(df_term)
-  }) 
-  
-  return(df_table)
 }
 
 #  duckdb ----
@@ -250,37 +137,6 @@ clean_df <- function(df, message_var, duckdb = F){
 }
 
 # popups ----
-file_size_logic <- function(file, df, ns){
-  
-  if (file){
-    shiny::showModal(shiny::modalDialog(
-      title = "Select a Column",
-      select_input_with_tooltip(id = ns("text_column"), title = "Text Column*",
-                                icon_info = "The name of the column with the text you want to analyse",
-                                choice_list = colnames(df)),
-      shiny::uiOutput(ns("text_col_missing_error")),
-      select_input_with_tooltip(id = ns("author_column"), title = "Author Column*",
-                                icon_info = "The name of the author column",
-                                choice_list = colnames(df)),
-      select_input_with_tooltip(id = ns("date_column"), title = "Date Column*",
-                                icon_info = "The name of the date column",
-                                choice_list = colnames(df)),
-      footer = shiny::actionButton(ns("confirm_input_cols"), "Go!")
-    ))
-  } else {
-    shinyalert::shinyalert("File must have less than 50k rows.",
-                           closeOnEsc = TRUE,
-                           closeOnClickOutside = FALSE,
-                           type = "warning")
-  }
-}
-
-message_col_check <- function(message_var, ns){
-  shiny::showModal(shiny::modalDialog(
-    title = "Select a Column",
-    footer = shiny::actionButton(ns("change_text_col"), "Go!")
-  ))
-}
 
 # top terms ----
 make_top_terms <- function(df, n_terms){
@@ -292,44 +148,6 @@ make_top_terms <- function(df, n_terms){
     
 }
 
-viz_top_terms <- function(top_terms){
-  
-}
-
-#' Generate counts for the most frequent n-grams in text.
-#'
-#' Function returns a list with a viz and a view object. The viz object can be fed into ParseR's `viz_ngram` function to produce a network visualisation.
-#'
-#' @param df A dataframe.
-#' @param text_var The variable containing the text.
-#' @param n The number of terms to include in the n-gram. E.g. 2 produces a bi-gram.
-#' @param top_n The number of n-grams to include.
-#' @param min_freq The minimum number of times an n-gram must be observed to be included.
-#' @param distinct If TRUE, will count # of unique posts for each n-gram.
-#' @param hashtags Should hashtags be included in the n-grams?
-#' @param mentions Should mentions be included in the n-grams?
-#' @param clean_text Should the text variable be cleaned?
-#' @param remove_stops Should stopwords be removed?
-#' @param tolower Should all tokens be lower cased in calls to unnest_tokens?
-#' @param ... fed to the `ParseR::clean_text()` function
-#'
-#' @return A list containing a summary table and a tidygraph object suitable for a network visualisation.
-#' @usage count_ngram(
-#'  df,
-#'  text_var = Message,
-#'  n = 2,
-#'  top_n = 50,
-#'  min_freq = 10,
-#'  distinct = FALSE,
-#'  hashtags = FALSE,
-#'  mentions = FALSE,
-#'  clean_text  = FALSE,
-#'  remove_stops = TRUE,
-#'  tolower = TRUE, 
-#'  ...
-#' )
-#' @importFrom magrittr "%>%"
-#' @export
 count_ngram_temp <- function(df,
                         text_var = Message,
                         n = 2,
