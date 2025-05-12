@@ -37,18 +37,25 @@ wloVizServer <- function(id, r){
     })
     
     shiny::observeEvent(input$wlo_action, {
-      r$viz_wlo <- NULL
-      r$wlo_group_var <- input$wlo_group_column
-      
-      r$viz_wlo <- ParseR::calculate_wlos(
-        df = dplyr::collect(r$df),
-        text_var = clean_text,
-        topic_var = !!rlang::sym(r$wlo_group_var),
-        top_n = 30,
-        filter_by = input$wlo_filter,
-        top_terms_cutoff = 500,
-        nrow = input$wlo_n_rows
-      )
+      if (!shiny::isTruthy(r$text_var)){
+        shinyalert::shinyalert("Select text variable to analyse",
+                               closeOnEsc = TRUE,
+                               closeOnClickOutside = FALSE,
+                               type = "warning")
+      } else {
+        r$viz_wlo <- NULL
+        r$wlo_group_var <- input$wlo_group_column
+        
+        r$viz_wlo <- ParseR::calculate_wlos(
+          df = dplyr::collect(r$df),
+          text_var = clean_text,
+          topic_var = !!rlang::sym(r$wlo_group_var),
+          top_n = 30,
+          filter_by = input$wlo_filter,
+          top_terms_cutoff = 500,
+          nrow = input$wlo_n_rows
+        )
+      }
     })
     
     output$wlo_viz <- shiny::renderPlot({

@@ -44,28 +44,35 @@ groupTermsVizServer <- function(id, r){
     })
     
     shiny::observeEvent(input$gt_action, {
-      r$viz_gt <- NULL # To facilitate css spinner timing
-      r$gt_group_var <- input$gt_group_column
-      
-      r$gt_selected_terms <- if (is.null(input$gt_selected_terms)){
-        NULL
+      if (!shiny::isTruthy(r$text_var)){
+        shinyalert::shinyalert("Select text variable to analyse",
+                               closeOnEsc = TRUE,
+                               closeOnClickOutside = FALSE,
+                               type = "warning")
       } else {
-        strsplit(input$gt_selected_terms, ",\\s*")[[1]]
+        r$viz_gt <- NULL # To facilitate css spinner timing
+        r$gt_group_var <- input$gt_group_column
+        
+        r$gt_selected_terms <- if (is.null(input$gt_selected_terms)){
+          NULL
+        } else {
+          strsplit(input$gt_selected_terms, ",\\s*")[[1]]
+        }
+        
+        r$viz_gt <- ParseR::viz_group_terms_network(
+          data = dplyr::collect(r$df),
+          group_var = !!rlang::sym(r$gt_group_var),
+          # text_var = !!rlang::sym(r$text_var),
+          text_var = clean_text,
+          n_terms = input$gt_n_terms,
+          text_size = 4,
+          with_ties = FALSE, # need to add customisation for all of this
+          # group_colour_map = input$gt_group_colour,
+          terms_colour = input$gt_term_colour,
+          selected_terms = r$gt_selected_terms,
+          selected_terms_colour = input$gt_emphasis_colour
+        ) 
       }
-      
-      r$viz_gt <- ParseR::viz_group_terms_network(
-        data = dplyr::collect(r$df),
-        group_var = !!rlang::sym(r$gt_group_var),
-        # text_var = !!rlang::sym(r$text_var),
-        text_var = clean_text,
-        n_terms = input$gt_n_terms,
-        text_size = 4,
-        with_ties = FALSE, # need to add customisation for all of this
-        # group_colour_map = input$gt_group_colour,
-        terms_colour = input$gt_term_colour,
-        selected_terms = r$gt_selected_terms,
-        selected_terms_colour = input$gt_emphasis_colour
-      )
     })
     
     output$gt_viz <- shiny::renderPlot({

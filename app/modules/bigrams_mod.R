@@ -35,39 +35,46 @@ bigramVizServer <- function(id, r){
     }) # update select input
     
     shiny::observeEvent(input$bigram_action, {
-      
-      r$bigram_calculated <- FALSE
-      r$bigram <- NULL
-      r$n_bigrams <- NULL
-      
-      if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
-        r$bigram <- r$df %>%
-          dplyr::collect() %>%
-          count_ngram_app(text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
-        r$n_bigrams <- 1
+      if (!shiny::isTruthy(r$text_var)){
+        shinyalert::shinyalert("Select text variable to analyse",
+                               closeOnEsc = TRUE,
+                               closeOnClickOutside = FALSE,
+                               type = "warning")
       } else {
-        df_groups <- split(dplyr::collect(r$df), dplyr::collect(r$df)[input$bigram_group_column])
-        r$bigram <- lapply(df_groups, function(group_df) {
-          count_ngram_app(df = group_df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
-        })
-        r$n_bigrams <- length(r$bigram) 
+        r$bigram_calculated <- FALSE
+        r$bigram <- NULL
+        r$n_bigrams <- NULL
+        
+        if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
+          r$bigram <- r$df %>%
+            dplyr::collect() %>%
+            count_ngram_app(text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
+          r$n_bigrams <- 1
+        } else {
+          df_groups <- split(dplyr::collect(r$df), dplyr::collect(r$df)[input$bigram_group_column])
+          r$bigram <- lapply(df_groups, function(group_df) {
+            count_ngram_app(df = group_df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
+          })
+          r$n_bigrams <- length(r$bigram) 
+        }
+        
+        r$bigram_calculated <- TRUE
+        
+        if (r$n_bigrams > 1){
+          lapply(seq_along(r$bigram), function(i) {
+            output[[paste0("bigram_group_", i)]] <- shiny::renderPlot({
+              req(r$bigram)
+              ParseR::viz_ngram(r$bigram[[i]]$viz )
+            })
+          })
+        } else {
+          output$bigram_group_1 <- shiny::renderPlot({
+            req(r$bigram)
+            ParseR::viz_ngram(r$bigram$viz)
+          })
+        } # render ui
       }
       
-      r$bigram_calculated <- TRUE
-      
-      if (r$n_bigrams > 1){
-        lapply(seq_along(r$bigram), function(i) {
-          output[[paste0("bigram_group_", i)]] <- shiny::renderPlot({
-            req(r$bigram)
-            ParseR::viz_ngram(r$bigram[[i]]$viz )
-          })
-        })
-      } else {
-        output$bigram_group_1 <- shiny::renderPlot({
-          req(r$bigram)
-          ParseR::viz_ngram(r$bigram$viz)
-        })
-      } # render ui
   
       }) # bigram creation and reactive fiddling
     
