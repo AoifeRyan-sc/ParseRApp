@@ -100,8 +100,6 @@ dataUploadServer <- function(id, r){
     }) # clean text - maybe need to change
     
     shiny::observeEvent(input$confirm_var , {
-      print("trigger confirm")
-      
       shiny::removeModal()
       
       r$text_var <- input$text_column
@@ -120,12 +118,11 @@ dataUploadServer <- function(id, r){
     })
     
     shiny::observeEvent(input$reselect_var, {
-      print("triggered redo")
       file_size_logic(file = T, df = r$master_df, ns = ns)
     })
     
     output$change_columns_button <- shiny::renderUI({
-      req(r$text_var)
+      req(r$df)
       shiny::actionButton(ns("reset_columns"), 
                           "Change Column Selections",
                           icon = shiny::icon("arrow-rotate-right", lib = "font-awesome"),
@@ -135,6 +132,10 @@ dataUploadServer <- function(id, r){
     
     shiny::observeEvent(input$reset_columns, {
       file_size_logic(file = T, df = r$master_df, ns = ns)
+    })
+    
+    shiny::observeEvent(input$restart_app, {
+      shiny::removeModal()
     })
     
     
