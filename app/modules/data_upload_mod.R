@@ -60,15 +60,9 @@ dataUploadServer <- function(id, r){
     #   message("finished")
     # })
 
-    output$file_uploaded <- shiny::reactive({
-      return(!is.null(r$df))
-    }) # logic for conditional panel in ui
-    shiny::outputOptions(output, "file_uploaded", suspendWhenHidden = FALSE)
-
     shiny::observeEvent(input$confirm_input_cols, { 
       
       if (shiny::isTruthy(input$text_column)){
-        print("not na")
         shiny::removeModal()
         
         r$text_var <- input$text_column
@@ -76,21 +70,28 @@ dataUploadServer <- function(id, r){
         r$sender_var <- input$author_column
         
         if (!tolower(r$text_var) %in% c("message", "text")){
-          message_col_check(message_var = r$text_var, ns = ns)
-        } else {
+          col_check(check_var = r$text_var, correct_var = "message", ns = ns)  
+        } 
+        # else if (isTruthy(r$sender_var) &!tolower(r$date_var) %in% c("screen_name", "screen name", "sender screen name", "sender_screen_name")){
+        #   col_check(check_var = r$sender_var, correct_var = "author", ns = ns)
+        # } else if (isTruthy(r$date_var) &!tolower(r$date_var) %in% c("date", "created time", "created_time", "createdtime")){
+        #   col_check(check_var = r$date_var, correct_var = "date", ns = ns)
+        # }
+        
+        else {
           shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
-          
+
           df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
-          
+
           make_duckdb(df = df_clean, con = r$con, name = "master_df")
           r$df <- dplyr::tbl(r$con, "master_df")
-          
+
           shinybusy::remove_modal_spinner()
           shiny::showNotification("Text cleaning completed!", type = "message")
         }
       
         } else {
-          print("is na")
+
           output$text_col_missing_error <- shiny::renderUI({
             missing_input_error("missing-selection-error", "Please select a text column")
           })
@@ -98,7 +99,8 @@ dataUploadServer <- function(id, r){
       
     }) # clean text - maybe need to change
     
-    shiny::observeEvent(input$confirm_message_col , {
+    shiny::observeEvent(input$confirm_var , {
+      print("trigger confirm")
       
       shiny::removeModal()
       
@@ -117,7 +119,8 @@ dataUploadServer <- function(id, r){
       shiny::showNotification("Text cleaning completed!", type = "message")
     })
     
-    shiny::observeEvent(input$reselect_message_var, {
+    shiny::observeEvent(input$reselect_var, {
+      print("triggered redo")
       file_size_logic(file = T, df = r$master_df, ns = ns)
     })
     

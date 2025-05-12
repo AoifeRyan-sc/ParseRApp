@@ -23,7 +23,10 @@ file_size_logic <- function(file, df, ns){
       select_input_with_tooltip(id = ns("date_column"), title = "Date Column",
                                 icon_info = "The name of the date column",
                                 choice_list = colnames(df)),
-      footer = shiny::actionButton(ns("confirm_input_cols"), "Go!")
+      footer = shiny::tagList(
+        shiny::actionButton(ns("restart_app"), "Go back", class = "btn-danger"),
+        shiny::actionButton(ns("confirm_input_cols"), "Go!", class = "btn-success")
+      )
     ))
   } else {
     shinyalert::shinyalert("File must have less than 50k rows.",
@@ -33,12 +36,12 @@ file_size_logic <- function(file, df, ns){
   }
 }
 
-message_col_check <- function(message_var, ns){
+col_check <- function(check_var, correct_var = c("date", "message", "author"), ns){
   shiny::showModal(shiny::modalDialog(
-    title = paste0("Are you sure ", message_var, " is the text variable you want to analyse?"),
+    title = paste0("Are you sure ", check_var, " is the, ", correct_var, " variable you want to analyse?"),
     footer = shiny::tagList(
-      shiny::actionButton(ns("reselect_message_var"), "Go back"),
-      shiny::actionButton(ns("confirm_message_col"), "Yes, continue")
+      shiny::actionButton(ns("reselect_var"), "Go back"),
+      shiny::actionButton(ns("confirm_var"), "Yes, continue")
     )
   ))
 }
