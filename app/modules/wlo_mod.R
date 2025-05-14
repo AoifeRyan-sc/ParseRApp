@@ -7,6 +7,7 @@ wloVizUi <- function(id){
       dropdownButton_with_tooltip(
         select_input_with_tooltip(id = ns("wlo_group_column"), title = "Group Column:", 
                                   icon_info = "The name of the column with the groups you want to compare."),
+        shiny::uiOutput(ns("wlo_group_missing_error")),
         numeric_input_with_tooltip(ns("wlo_n_terms"), "Number of terms:", default_value = 20, 
                                    icon_info = "The number of terms you want to show per group."),
         numeric_input_with_tooltip(ns("wlo_n_rows"), "Number of rows:", default_value = 3, 
@@ -37,14 +38,24 @@ wloVizServer <- function(id, r){
     })
     
     shiny::observeEvent(input$wlo_action, {
+      r$viz_wlo <- NULL
+      r$wlo_group_var <- input$wlo_group_column
+      
       if (!shiny::isTruthy(r$text_var)){
         shinyalert::shinyalert("Select text variable to analyse",
                                closeOnEsc = TRUE,
                                closeOnClickOutside = FALSE,
                                type = "warning")
-      } else {
-        r$viz_wlo <- NULL
-        r$wlo_group_var <- input$wlo_group_column
+      } 
+      else if (!shiny::isTruthy(r$gt_group_var)) {
+        print("falsy")
+        print(shiny::isTruthy(r$gt_group_var))
+        output$wlo_group_missing_error <- shiny::renderUI({
+          missing_input_error("missing-selection-error", "Please select a group column")
+        })
+      }
+      else {
+        output$gt_group_missing_error <- shiny::renderUI({})
         
         r$viz_wlo <- ParseR::calculate_wlos(
           df = dplyr::collect(r$df),

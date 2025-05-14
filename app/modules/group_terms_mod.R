@@ -7,6 +7,7 @@ groupTermsVizUi <- function(id){
       dropdownButton_with_tooltip(
         select_input_with_tooltip(id = ns("gt_group_column"), title = "Group Column*",
                                   icon_info = "The name of the column with the groups you want to compare."),
+        shiny::uiOutput(ns("gt_group_missing_error")),
         numeric_input_with_tooltip(ns("gt_n_terms"), "Number of terms:", default_value = 20, 
                                    icon_info = "The number of terms you want to show per group."),
         text_input_with_tooltip(id = ns("gt_selected_terms"), "Emphasise terms:", 
@@ -44,14 +45,26 @@ groupTermsVizServer <- function(id, r){
     })
     
     shiny::observeEvent(input$gt_action, {
+      r$viz_gt <- NULL # To facilitate css spinner timing
+      r$gt_group_var <- input$gt_group_column
+      
       if (!shiny::isTruthy(r$text_var)){
         shinyalert::shinyalert("Select text variable to analyse",
                                closeOnEsc = TRUE,
                                closeOnClickOutside = FALSE,
                                type = "warning")
-      } else {
-        r$viz_gt <- NULL # To facilitate css spinner timing
-        r$gt_group_var <- input$gt_group_column
+      } 
+      else if (!shiny::isTruthy(r$gt_group_var)) {
+        print("falsy")
+        print(shiny::isTruthy(r$gt_group_var))
+        output$gt_group_missing_error <- shiny::renderUI({
+          missing_input_error("missing-selection-error", "Please select a group column")
+        })
+      }
+      else {
+        output$gt_group_missing_error <- shiny::renderUI({})
+        print(r$gt_group_var)
+        print(shiny::isTruthy(r$gt_group_variable))
         
         r$gt_selected_terms <- if (is.null(input$gt_selected_terms)){
           NULL
