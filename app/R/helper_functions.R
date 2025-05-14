@@ -1,3 +1,5 @@
+samy_palette <- c("#C6492A", "#E2AC5C", "#7AAE67", "#3B589E")
+
 create_terms_table <- function(terms, df, group_var, message_var){
   
   df_table <- purrr::map_dfr(terms, function(term){
@@ -139,27 +141,76 @@ clean_df <- function(df, message_var, duckdb = F){
 # popups ----
 
 # top terms ----
-make_top_terms <- function(df, n_terms, group = NULL){
+make_top_terms <- function(df, n_terms, group_var = NULL, group = F){
   
   all_terms <- df %>% 
     tidytext::unnest_tokens(output = word, input = clean_text, token = "words", to_lower = FALSE)
   
-  if (!is.null(group)){
-    all_terms <- all_terms %>% group_by({{ group }})
+  if (group){
+    all_terms <- all_terms %>% dplyr::group_by({{ group_var }})
   }
     
   top_terms <- all_terms %>%
-    count(word) %>%
-    slice_max(n = n_terms, order_by = n, with_ties = F) 
+    dplyr::count(word) %>%
+    dplyr::slice_max(n = n_terms, order_by = n, with_ties = F) %>%
+    dplyr::ungroup()
     
 }
 
-viz_top_terms <- function(top_terms, type = c("lollipops", "bars"), group = NULL, nrow = 1){
+top_terms_theme <- function(){
+  theme <- ggplot2::theme_minimal() +
+    ggplot2::theme(title = ggplot2::element_text(size = 16),
+                   text = ggplot2::element_text(size = 10),
+                   strip.text = ggplot2::element_text(size = 14),
+                   axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5),
+                   axis.title.x = ggplot2::element_text(size = 14))
+  
+  return(theme)
+}
+
+viz_top_terms_group <- function(top_terms, type = c("lollipops", "bars"), nrow = 1, group_var){
+  type <- match.arg(type)
+  
+  plot <- top_terms %>%
+    dplyr::mutate(group_word = paste0({{ group_var }}, "_", word),
+                  group_word = forcats::fct_reorder(group_word, n)) %>%
+    ggplot2::ggplot(ggplot2::aes(x = group_word, y = n, 
+                                 fill = {{ group_var }}, colour = {{ group_var }}
+                                 )) +
+    ggplot2::scale_x_discrete(name= "Term", labels=function(x) sub('^.*_(.*)$', '\\1', x)) +
+    
+    if (type == "lollipops"){
+      
+      plot1 <- plot0 + 
+        ggplot2::geom_segment(ggplot2::aes(x = group_word, xend = group_word,
+                                         y = 0, yend = n),
+                            show.legend = FALSE) +
+        ggplot2::geom_point(size = 3,
+                          shape = 21,
+                          show.legend = FALSE)
+  } else {
+    plot <- plot + ggplot2::geom_col(show.legend = F)
+  }
+  
+  plot <- plot +
+    ggplot2::facet_wrap(vars({{ group_var }}),
+                        scales = "free",
+                        nrow = nrow) +
+    ggplot2::coord_flip() +
+    ggplot2::scale_y_continuous(name = "Number of occurences") +
+    top_terms_theme()
+  
+  
+  return(plot)
+    
+}
+
+viz_top_terms_no_group <- function(top_terms, type = c("lollipops", "bars"), nrow = 1){
   type <- match.arg(type)
   
   plot <- top_terms %>%
     dplyr::mutate(word = forcats::fct_reorder(word, n, .desc = F)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = word, y = n))
+    ggplot2::ggplot(ggplot2::aes(x = word, y = n, , colour = {{ group_var }}))
   
   if (type == "lollipops"){
     plot <- plot + 
@@ -173,33 +224,15 @@ viz_top_terms <- function(top_terms, type = c("lollipops", "bars"), group = NULL
     plot <- plot + ggplot2::geom_col(show.legend = F)
   }
   
-  if (!is.null(group)){
-    plot <- plot +
-      ggplot2::facet_wrap({{ group }},
-                          scales = "free",
-                          labeller = ggplot2::label_both,
-                          nrow = nrow)
-  }
-  
   plot <- plot +
     ggplot2::coord_flip() +
     tidytext::scale_x_reordered("Term") +
-    ggplot2::scale_y_continuous(
-      # ggplot will render the beta symbol appropriately
-      name = expression(paste("Probability term belongs to topic (", beta, ")")
-      )) +
-    # ggplot2::scale_y_continuous("Probability term belongs to topic (beta)") +
-    # ggplot2::scale_fill_manual(values = as.vector(.ms_palette(30))) +
-    # ggplot2::scale_colour_manual(values = as.vector(.ms_palette(30))) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(title = ggplot2::element_text(size = 16),
-                   text = ggplot2::element_text(size = 10),
-                   strip.text = ggplot2::element_text(size = 14),
-                   axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5),
-                   axis.title.x = ggplot2::element_text(size = 14))
+    ggplot2::scale_y_continuous(name = "Number of occurences") +
+    top_terms_theme()
+  
   
   return(plot)
-    
+  
 }
 
 count_ngram_temp <- function(df,

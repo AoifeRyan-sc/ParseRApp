@@ -5,10 +5,16 @@ topTermsVizUi <- function(id){
       shiny::HTML("Top Terms <i>(make selections in dropdown to render)</i>")),
     bslib::card_body(
       dropdownButton_with_tooltip(
+        select_input_with_tooltip(ns("top_terms_chart_type"), "Chart Type", 
+                                  icon_info = "Do you want the output chart to be a bar chart or a lollipop chart?",
+                                  choice_list = c("bars", "lollipops"), 
+                                  select = "lollipop"),
         select_input_with_tooltip(ns("top_terms_group_column"), "Group Variable", 
                                   icon_info = "The column that contains the groups you want to create Top Terms for (if applicable), e.g. Sentiment, Platform"),
         numeric_input_with_tooltip(ns("top_terms_top_n"), "Number of terms:", default_value = 25,
                                    icon_info = "The number of terms to include."),
+        numeric_input_with_tooltip(ns("top_terms_nrows"), "Number of rows:", default_value = 1,
+                                   icon_info = "The number of rows to include in the output chart."),
         shiny::actionButton(ns("top_terms_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Top Term Inputs", 
         icon_info = "Click here for Top Term customisation"
@@ -28,7 +34,7 @@ topTermsVizServer <- function(id, r){
     
     shiny::observe({
       shiny::req(r$df)
-      shiny::updateSelectizeInput(session = session, "top_gterms_roup_column", choices = colnames(r$df), selected = NULL)
+      shiny::updateSelectizeInput(session = session, "top_terms_group_column", choices = c("No Group Variable" = "none", colnames(r$df)), selected = "none")
     })
     
     shiny::observeEvent(input$top_terms_action, {
@@ -39,20 +45,42 @@ topTermsVizServer <- function(id, r){
                                closeOnClickOutside = FALSE,
                                type = "warning")
       } else {
-        r$viz_top_terms <- NULL
+        message("calculating top terms")
+        r$top_terms <- NULL
         r$top_terms_group_var <- input$top_terms_group_column
         
-        r$viz_top_terms <- make_top_terms(
+        grouped <- r$top_terms_group_var != "none"
+        
+        r$top_terms <- make_top_terms(
           df = collect(r$df),
-          n_terms = input$top_terms_top_n
+          n_terms = input$top_terms_top_n,
+          group = grouped,
+          group_var = !!rlang::sym(r$top_terms_group_var)
         )
+        
+        if (grouped){
+          r$top_terms_viz <- viz_top_terms_group(
+            r$top_terms, 
+            type = input$top_terms_chart_type, 
+            nrow = input$top_terms_nrows,
+            group_var = !!rlang::sym(r$top_terms_group_var)
+            )
+        } else {
+          r$top_terms_viz <- viz_top_terms_no_group(
+            r$top_terms, 
+            type = input$top_terms_chart_type, 
+            nrow = input$top_terms_nrows
+          )
+        }
+        
       }
       
     })
     
     output$top_terms_viz <- shiny::renderPlot({
-      req(r$viz_top_terms)
-      r$viz_top_terms
+      req(r$top_terms)
+      r$top_terms_viz
+      
     })
     
     

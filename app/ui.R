@@ -59,7 +59,7 @@ ui <- bslib::page_sidebar(
     width = 1/2,
     heights_equal = "row",
     topTermsVizUi("top_terms_viz_card"),
-    topTermsDataUi("top_terms_data_card")
+    # topTermsDataUi("top_terms_data_card")
   )
   )
 )
