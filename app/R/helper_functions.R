@@ -181,7 +181,7 @@ viz_top_terms_group <- function(top_terms, type = c("lollipops", "bars"), nrow =
     
     if (type == "lollipops"){
       
-      plot1 <- plot0 + 
+      plot <- plot + 
         ggplot2::geom_segment(ggplot2::aes(x = group_word, xend = group_word,
                                          y = 0, yend = n),
                             show.legend = FALSE) +
