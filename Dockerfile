@@ -17,6 +17,7 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     
 ## app folder
 COPY /app ./app
+COPY deploy.R deploy.R
 COPY renv.lock /renv.lock 
 
 ARG PARSER_AUTH_KEY
@@ -28,7 +29,5 @@ RUN Rscript -e 'install.packages("renv")' &&\
     Rscript -e 'install.packages("remotes")' &&\
     Rscript -e 'remotes::install_github("Avery-Island/ParseR", auth_token = Sys.getenv("PARSER_AUTH_KEY"))'
 
-EXPOSE 3838
-
 # Use the script as entrypoint
-CMD ["R", "-e", "shiny::runApp('/app', host = '0.0.0.0', port = 3838)"]
+CMD Rscript deploy.R
