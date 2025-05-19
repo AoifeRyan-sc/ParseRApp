@@ -4,3 +4,4 @@
 ^\.Rproj\.user$
 ^\.Renviron$
 app/rsconnect/
+^\.github$
