@@ -1,7 +1,7 @@
-if (!requireNamespace("ParseR", quietly = TRUE)) {
-  remotes::install_github("Avery-Island/ParseR",
-                          auth_token = Sys.getenv("PARSER_AUTH_KEY"))
-}
+# if (!requireNamespace("ParseR", quietly = TRUE)) {
+#   remotes::install_github("Avery-Island/ParseR",
+#                           auth_token = Sys.getenv("PARSER_AUTH_KEY"))
+# }
 
 library(shiny)
 library(magrittr)
