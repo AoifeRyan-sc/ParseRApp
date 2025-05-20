@@ -97,48 +97,7 @@ get_wlo_terms <- function(wlo_view){
   wlo_terms <- unique(wlo_view$word)
   
   return(wlo_terms)
-} # do I use this?
-
-#  duckdb ----
-
-make_duckdb <- function(df, con, name){
-  duckdb::dbWriteTable(
-    conn = con,
-    name = name,
-    df,
-    overwrite = TRUE
-  )
-}
-
-# cleaning ----
-clean_df <- function(df, message_var, duckdb = F){
-  
-  df <- df %>%
-    dplyr::mutate(clean_text = message_var) %>%
-    ParseR::clean_text(
-      text_var = clean_text,
-      tolower = T, # should make some of this customisable
-      remove_mentions = T,
-      remove_punctuation = T,
-      remove_digits = T,
-      in_parallel = F # be aware if we are deploying this - does this work with duckdb?
-    ) 
-  
-  if (duckdb){
-    df <- df %>%
-      dplyr::collect() %>%
-      dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
-      LimpiaR::limpiar_spaces(clean_text)
-  } else {
-    df <- df %>%
-      dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
-      LimpiaR::limpiar_spaces(clean_text)
-  }
-  
-  return(df)
-}
-
-# popups ----
+} 
 
 # top terms ----
 make_top_terms <- function(df, n_terms, group_var = NULL, group = F){
@@ -235,6 +194,14 @@ viz_top_terms_no_group <- function(top_terms, type = c("lollipops", "bars"), nro
   
 }
 
+get_tt_terms <- function(top_terms){
+  
+  tt_terms <- unique(top_terms$word)
+  
+  return(tt_terms)
+} 
+
+# data handling ---- 
 
 clear_reactives <- function(r){
   num_reactives <- length(names(r))
@@ -254,4 +221,40 @@ load_data <- function(r){
                       csv = read.csv(r$file_path),
                       xlsx = readxl::read_xlsx(r$file_path),
                       rds = readRDS(r$file_path)) # maybe should use duckdb to read data in too
+}
+
+clean_df <- function(df, message_var, duckdb = F){
+  
+  df <- df %>%
+    dplyr::mutate(clean_text = message_var) %>%
+    ParseR::clean_text(
+      text_var = clean_text,
+      tolower = T, # should make some of this customisable
+      remove_mentions = T,
+      remove_punctuation = T,
+      remove_digits = T,
+      in_parallel = F # be aware if we are deploying this - does this work with duckdb?
+    ) 
+  
+  if (duckdb){
+    df <- df %>%
+      dplyr::collect() %>%
+      dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
+      LimpiaR::limpiar_spaces(clean_text)
+  } else {
+    df <- df %>%
+      dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
+      LimpiaR::limpiar_spaces(clean_text)
+  }
+  
+  return(df)
+}
+
+make_duckdb <- function(df, con, name){
+  duckdb::dbWriteTable(
+    conn = con,
+    name = name,
+    df,
+    overwrite = TRUE
+  )
 }

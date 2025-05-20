@@ -58,8 +58,8 @@ ui <- bslib::page_sidebar(
   bslib::layout_column_wrap(
     width = 1/2,
     heights_equal = "row",
-    topTermsVizUi("top_terms_viz_card"),
-    # topTermsDataUi("top_terms_data_card")
+    topTermsDataUi("top_terms_data_card"),
+    topTermsVizUi("top_terms_viz_card")
   )
   )
 )

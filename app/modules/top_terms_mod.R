@@ -11,7 +11,7 @@ topTermsVizUi <- function(id){
                                   select = "lollipop"),
         select_input_with_tooltip(ns("top_terms_group_column"), "Group Variable", 
                                   icon_info = "The column that contains the groups you want to create Top Terms for (if applicable), e.g. Sentiment, Platform"),
-        numeric_input_with_tooltip(ns("top_terms_top_n"), "Number of terms:", default_value = 25,
+        numeric_input_with_tooltip(ns("top_terms_top_n"), "Number of terms:", default_value = 15,
                                    icon_info = "The number of terms to include."),
         numeric_input_with_tooltip(ns("top_terms_nrows"), "Number of rows:", default_value = 1,
                                    icon_info = "The number of rows to include in the output chart."),
@@ -108,19 +108,19 @@ topTermsDataServer <- function(id, r){
     ns <- session$ns
     
     output$top_terms_data_output <- shiny::renderUI({
-      req(r$viz_top_terms)
+      req(r$top_terms_viz)
       DT::dataTableOutput(ns("top_terms_data_display")) 
     })
     
     shiny::observe({
-      req(r$viz_top_terms)
-      top_terms_terms <- get_top_terms_terms(r$viz_top_terms$view)
-      r$top_terms_table <- create_terms_table(top_terms_terms, r$df, r$top_terms_group_var, r$text_var)
-      print(head(r$top_terms_table))
+      req(r$top_terms_viz)
+      tt_terms <- get_tt_terms(r$top_terms)
+      r$top_terms_table <- create_terms_table(tt_terms, r$df, r$top_terms_group_var, r$text_var)
     })
     
     output$top_terms_data_display <- DT::renderDataTable({
       req(r$top_terms_table)
+      print("rendering table")
       r$top_terms_table %>% 
         collect() %>%
         mutate(Term = as.factor(Term),
