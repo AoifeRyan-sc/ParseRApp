@@ -47,7 +47,7 @@ wloVizServer <- function(id, r){
                                closeOnClickOutside = FALSE,
                                type = "warning")
       } 
-      else if (!shiny::isTruthy(r$gt_group_var)) {
+      else if (!shiny::isTruthy(r$wlo_group_var)) {
         print("falsy")
         print(shiny::isTruthy(r$gt_group_var))
         output$wlo_group_missing_error <- shiny::renderUI({

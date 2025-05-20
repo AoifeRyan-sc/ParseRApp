@@ -50,7 +50,7 @@ bigram_pairs <- function(bigram_output, df, message_var){
 
 # Personalised functions ----
 count_ngram_app <- function(df, text_var, top_n, min_freq){
-  ngram_data <- count_ngram_temp(
+  ngram_data <- ParseR::count_ngram(
   # ParseR::count_ngram(
     df = df,
     text_var = {{text_var}},
@@ -177,7 +177,7 @@ viz_top_terms_group <- function(top_terms, type = c("lollipops", "bars"), nrow =
     ggplot2::ggplot(ggplot2::aes(x = group_word, y = n, 
                                  fill = {{ group_var }}, colour = {{ group_var }}
                                  )) +
-    ggplot2::scale_x_discrete(name= "Term", labels=function(x) sub('^.*_(.*)$', '\\1', x)) +
+    ggplot2::scale_x_discrete(name= "Term", labels=function(x) sub('^.*_(.*)$', '\\1', x))
     
     if (type == "lollipops"){
       
@@ -207,10 +207,10 @@ viz_top_terms_group <- function(top_terms, type = c("lollipops", "bars"), nrow =
 
 viz_top_terms_no_group <- function(top_terms, type = c("lollipops", "bars"), nrow = 1){
   type <- match.arg(type)
-  
+
   plot <- top_terms %>%
     dplyr::mutate(word = forcats::fct_reorder(word, n, .desc = F)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = word, y = n, , colour = {{ group_var }}))
+    ggplot2::ggplot(ggplot2::aes(x = word, y = n))
   
   if (type == "lollipops"){
     plot <- plot + 
@@ -233,107 +233,6 @@ viz_top_terms_no_group <- function(top_terms, type = c("lollipops", "bars"), nro
   
   return(plot)
   
-}
-
-count_ngram_temp <- function(df,
-                        text_var = Message,
-                        n = 2,
-                        top_n = 50,
-                        min_freq = 10,
-                        distinct = FALSE,
-                        hashtags = FALSE,
-                        mentions = FALSE,
-                        clean_text = FALSE,
-                        remove_stops = TRUE,
-                        tolower = TRUE,
-                        ...) {
-  
-  
-  # Tidy evaluate supplied text variable
-  text_quo <- rlang::enquo(text_var)
-  text_sym <- rlang::ensym(text_var)
-  
-  # Loading the new stop words list
-  stopwords <- ParseR::stopwords
-  
-  # use ParseR's clean_text function if the user asks
-  if (clean_text) {
-    clean_df <- df %>%
-      ParseR::clean_text(text_var = !!text_sym, ...) %>%
-      dplyr::select(!!text_sym) %>%
-      dplyr::mutate(.document = dplyr::row_number()) # add a document ID column for distinct
-  } else {
-    clean_df <- df %>% dplyr::select(!!text_sym) %>%  #keep the only column we need
-      dplyr::mutate(.document = dplyr::row_number()) # add a document ID column for distinct
-  }
-  
-  
-  
-  # Avoid any NA strings
-  clean_df <- clean_df %>%
-    dplyr::filter(!is.na(!!text_sym))
-  
-  # Make edges df
-  ngrams <- clean_df %>%
-    tidytext::unnest_tokens(ngram,
-                            !!text_sym,
-                            token = "ngrams",
-                            n = n,
-                            format = "text",
-                            to_lower = tolower
-    ) %>%
-    dplyr::filter(!is.na(ngram)) # Make sure no NA values here or tidygraph will fail later
-  
-  word_names <- paste0("word", 1:n)
-  
-  # Separate the unnested ngrams into n (length of n-gram)columns
-  edges_df <- ngrams %>%
-    tidyr::separate_wider_delim(ngram, " ", names = word_names)
-  
-  if(remove_stops) {
-    edges_df <- edges_df %>%
-      dplyr::filter_at(.vars = word_names, ~ !. %in% stopwords$stopwords & !is.na(.)) 
-  }
-  
-  # Remove copies
-  if (distinct) {
-    edges_df <- edges_df %>% dplyr::distinct()
-  }
-  
-  edges_df <- edges_df %>%
-    dplyr::count(!!!dplyr::syms(word_names), sort = TRUE, name = "ngram_freq") %>%
-    dplyr::filter(ngram_freq >= min_freq) %>%
-    dplyr::slice_max(n = top_n, order_by = ngram_freq)
-  
-  # Get all ngrams
-  ngram_words <- edges_df %>%
-    dplyr::select(-ngram_freq) %>%
-    unlist() %>%
-    unique()
-  
-  # Builds nodes df (single words) 
-  nodes_df <- clean_df %>%
-    tidytext::unnest_tokens(word, !!text_sym, token = "words", format = "text", to_lower = tolower)
-  
-  if (distinct) {
-    nodes_df <- nodes_df %>% dplyr::distinct()
-  }
-  
-  if (remove_stops) {
-    nodes_df <- nodes_df %>%
-      dplyr::filter(!word %in% stopwords$stopwords)
-  }
-  
-  nodes_df <- nodes_df %>%
-    dplyr::filter(!is.na(word)) %>%
-    dplyr::count(word, sort = TRUE, name = "word_freq") %>%
-    dplyr::filter(word %in% ngram_words)
-  
-  # Join together for output
-  tidy_ngram <- tidygraph::tbl_graph(nodes = nodes_df, edges = edges_df)
-  
-  # Output list
-  return(list("viz" = tidy_ngram, "view" = edges_df))
 }
 
 
