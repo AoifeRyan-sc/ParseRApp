@@ -52,7 +52,7 @@ topTermsVizServer <- function(id, r){
         grouped <- r$top_terms_group_var != "none"
         
         r$top_terms <- make_top_terms(
-          df = collect(r$df),
+          df = dplyr::collect(r$df),
           n_terms = input$top_terms_top_n,
           group = grouped,
           group_var = !!rlang::sym(r$top_terms_group_var)
@@ -115,20 +115,20 @@ topTermsDataServer <- function(id, r){
     shiny::observe({
       req(r$top_terms_viz)
       tt_terms <- get_tt_terms(r$top_terms)
-      print(r$top_terms_group_var)
       r$top_terms_table <- create_terms_table(tt_terms, r$df, r$top_terms_group_var, r$text_var)
     })
     
     output$top_terms_data_display <- DT::renderDataTable({
       req(r$top_terms_table)
+      print("rendering table")
       tt_table <- r$top_terms_table %>% 
-        mutate(Term = as.factor(Term))
+        dplyr::mutate(Term = as.factor(Term))
       
       if (r$top_terms_group_var != "none"){
         tt_table <- tt_table %>%
-          mutate(Group = as.factor(Group))
+          dplyr::mutate(Group = as.factor(Group))
       }
-        tt_table %>% datatable_display_app()
+      tt_table %>% datatable_display_app()
     })
     
   })

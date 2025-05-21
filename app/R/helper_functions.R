@@ -8,7 +8,7 @@ create_terms_table <- function(terms, df, group_var, message_var){
         dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
         dplyr::mutate(Term = term) %>%
         dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
-        collect()
+        dplyr::collect()
     }) 
   } else {
     df_table <- purrr::map_dfr(terms, function(term){
@@ -16,9 +16,9 @@ create_terms_table <- function(terms, df, group_var, message_var){
         dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
         dplyr::mutate(Term = term) %>%
         dplyr::select(Term, message_var, clean_text) %>%
-        collect()
-      }) 
-  }
+        dplyr::collect()
+    }) 
+  } 
   
   return(df_table)
 }
