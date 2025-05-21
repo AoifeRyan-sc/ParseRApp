@@ -115,17 +115,20 @@ topTermsDataServer <- function(id, r){
     shiny::observe({
       req(r$top_terms_viz)
       tt_terms <- get_tt_terms(r$top_terms)
+      print(r$top_terms_group_var)
       r$top_terms_table <- create_terms_table(tt_terms, r$df, r$top_terms_group_var, r$text_var)
     })
     
     output$top_terms_data_display <- DT::renderDataTable({
       req(r$top_terms_table)
-      print("rendering table")
-      r$top_terms_table %>% 
-        collect() %>%
-        mutate(Term = as.factor(Term),
-               Group = as.factor(Group)) %>%
-        datatable_display_app()
+      tt_table <- r$top_terms_table %>% 
+        mutate(Term = as.factor(Term))
+      
+      if (group_var != "none"){
+        tt_table <- tt_table %>%
+          mutate(Group = as.factor(Group))
+      }
+        tt_table %>% datatable_display_app()
     })
     
   })
