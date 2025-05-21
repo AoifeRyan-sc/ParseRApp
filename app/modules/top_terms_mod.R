@@ -124,7 +124,7 @@ topTermsDataServer <- function(id, r){
       tt_table <- r$top_terms_table %>% 
         mutate(Term = as.factor(Term))
       
-      if (group_var != "none"){
+      if (r$top_terms_group_var != "none"){
         tt_table <- tt_table %>%
           mutate(Group = as.factor(Group))
       }
