@@ -52,7 +52,7 @@ topTermsVizServer <- function(id, r){
         grouped <- r$top_terms_group_var != "none"
         
         r$top_terms <- make_top_terms(
-          df = collect(r$df),
+          df = dplyr::collect(r$df),
           n_terms = input$top_terms_top_n,
           group = grouped,
           group_var = !!rlang::sym(r$top_terms_group_var)
