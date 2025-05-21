@@ -2,13 +2,23 @@ samy_palette <- c("#C6492A", "#E2AC5C", "#7AAE67", "#3B589E")
 
 create_terms_table <- function(terms, df, group_var, message_var){
   
-  df_table <- purrr::map_dfr(terms, function(term){
-    df %>%
-      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
-      dplyr::mutate(Term = term) %>%
-      dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
-      dplyr::collect()
-  }) 
+  if (group_var != "none"){
+    df_table <- purrr::map_dfr(terms, function(term){
+      df %>%
+        dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
+        dplyr::mutate(Term = term) %>%
+        dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
+        collect()
+    }) 
+  } else {
+    df_table <- purrr::map_dfr(terms, function(term){
+      tmp <- df %>%
+        dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
+        dplyr::mutate(Term = term) %>%
+        dplyr::select(Term, message_var, clean_text) %>%
+        collect()
+    }) 
+  } 
   
   return(df_table)
 }

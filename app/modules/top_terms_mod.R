@@ -121,11 +121,14 @@ topTermsDataServer <- function(id, r){
     output$top_terms_data_display <- DT::renderDataTable({
       req(r$top_terms_table)
       print("rendering table")
-      r$top_terms_table %>% 
-        collect() %>%
-        mutate(Term = as.factor(Term),
-               Group = as.factor(Group)) %>%
-        datatable_display_app()
+      tt_table <- r$top_terms_table %>% 
+        mutate(Term = as.factor(Term))
+      
+      if (group_var != "none"){
+        tt_table <- tt_table %>%
+          mutate(Group = as.factor(Group))
+      }
+      tt_table %>% datatable_display_app()
     })
     
   })
