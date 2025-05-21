@@ -16,6 +16,7 @@ Imports:
     dplyr,
     DT,
     duckplyr,
+    forcats,
     htmlwidgets,
     LimpiaR,
     ParseR,
