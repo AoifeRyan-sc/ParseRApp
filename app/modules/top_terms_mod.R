@@ -122,11 +122,11 @@ topTermsDataServer <- function(id, r){
       req(r$top_terms_table)
       print("rendering table")
       tt_table <- r$top_terms_table %>% 
-        mutate(Term = as.factor(Term))
+        dplyr::mutate(Term = as.factor(Term))
       
       if (group_var != "none"){
         tt_table <- tt_table %>%
-          mutate(Group = as.factor(Group))
+          dplyr::mutate(Group = as.factor(Group))
       }
       tt_table %>% datatable_display_app()
     })
