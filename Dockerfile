@@ -25,6 +25,7 @@ ENV PARSER_AUTH_KEY=$PARSER_AUTH_KEY
 
 # Install renv
 RUN Rscript -e 'install.packages("renv")' &&\
+    Rscript -e 'install.packages("rsconnect")' &&\
     Rscript -e 'renv::restore(lockfile = "/renv.lock")' &&\
     Rscript -e 'install.packages("remotes")' &&\
     Rscript -e 'remotes::install_github("Avery-Island/ParseR", auth_token = Sys.getenv("PARSER_AUTH_KEY"))'
