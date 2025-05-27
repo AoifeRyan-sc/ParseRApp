@@ -20,7 +20,8 @@ wloVizUi <- function(id){
         icon_info = "Click here for WLO customisation"
       ), # need to add more parameters here
       shinycssloaders::withSpinner(
-        shiny::plotOutput(ns("wlo_viz"))
+        shiny::plotOutput(ns("wlo_viz")),
+        fill = T
       )
     ),
     full_screen = TRUE,

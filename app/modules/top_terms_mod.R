@@ -20,7 +20,8 @@ topTermsVizUi <- function(id){
         icon_info = "Click here for Top Term customisation"
       ), # need to add more parameters here
       shinycssloaders::withSpinner(
-        shiny::plotOutput(ns("top_terms_viz"))
+        shiny::plotOutput(ns("top_terms_viz")),
+        fill = T
       )
     ),
     full_screen = TRUE,

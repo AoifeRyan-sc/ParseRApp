@@ -27,7 +27,8 @@ groupTermsVizUi <- function(id){
         icon_info = "Click here for Group Terms customisation"
       ), # need to add more parameters here
       shinycssloaders::withSpinner(
-        shiny::plotOutput(ns("gt_viz"))
+        shiny::plotOutput(ns("gt_viz")),
+        fill = T
       )
     ),
     full_screen = TRUE,
