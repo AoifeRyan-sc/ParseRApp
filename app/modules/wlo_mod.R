@@ -71,7 +71,6 @@ wloVizServer <- function(id, r){
     })
     
     output$wlo_viz <- shiny::renderPlot({
-      req(r$viz_wlo)
       r$viz_wlo
     })
     
@@ -87,7 +86,8 @@ wloDataUi <- function(id){
       shiny::HTML("Weighted Log Odds Data")),
     bslib::card_body(
       shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("wlo_data_output"))
+        shiny::uiOutput(ns("wlo_data_output")),
+        fill = T
       )
     ),
     full_screen = TRUE,
@@ -100,7 +100,7 @@ wloDataServer <- function(id, r){
     ns <- session$ns
     
     output$wlo_data_output <- shiny::renderUI({
-      req(r$viz_wlo)
+      # req(r$viz_wlo)
       DT::dataTableOutput(ns("wlo_data_display")) 
     })
     

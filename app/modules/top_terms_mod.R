@@ -79,9 +79,7 @@ topTermsVizServer <- function(id, r){
     })
     
     output$top_terms_viz <- shiny::renderPlot({
-      req(r$top_terms)
       r$top_terms_viz
-      
     })
     
     
@@ -97,7 +95,8 @@ topTermsDataUi <- function(id){
     bslib::card_body(
       shinycssloaders::withSpinner(
         shiny::uiOutput(ns("top_terms_data_output"))
-      )
+      ),
+      fill = T
     ),
     full_screen = TRUE,
     min_height = 500
@@ -109,7 +108,7 @@ topTermsDataServer <- function(id, r){
     ns <- session$ns
     
     output$top_terms_data_output <- shiny::renderUI({
-      req(r$top_terms_viz)
+      # req(r$top_terms_viz)
       DT::dataTableOutput(ns("top_terms_data_display")) 
     })
     
@@ -121,7 +120,6 @@ topTermsDataServer <- function(id, r){
     
     output$top_terms_data_display <- DT::renderDataTable({
       req(r$top_terms_table)
-      print("rendering table")
       tt_table <- r$top_terms_table %>% 
         dplyr::mutate(Term = as.factor(Term))
       

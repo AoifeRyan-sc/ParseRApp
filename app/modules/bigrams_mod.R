@@ -63,13 +63,13 @@ bigramVizServer <- function(id, r){
         if (r$n_bigrams > 1){
           lapply(seq_along(r$bigram), function(i) {
             output[[paste0("bigram_group_", i)]] <- shiny::renderPlot({
-              req(r$bigram)
+              # req(r$bigram)
               ParseR::viz_ngram(r$bigram[[i]]$viz )
             })
           })
         } else {
           output$bigram_group_1 <- shiny::renderPlot({
-            req(r$bigram)
+            # req(r$bigram)
             ParseR::viz_ngram(r$bigram$viz)
           })
         } # render ui

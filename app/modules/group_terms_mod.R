@@ -92,7 +92,6 @@ groupTermsVizServer <- function(id, r){
     })
     
     output$gt_viz <- shiny::renderPlot({
-      # req(r$viz_gt)
       r$viz_gt
     })
     
