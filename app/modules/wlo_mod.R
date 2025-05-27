@@ -25,7 +25,8 @@ wloVizUi <- function(id){
       )
     ),
     full_screen = TRUE,
-    min_height = 500
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
@@ -91,7 +92,8 @@ wloDataUi <- function(id){
       )
     ),
     full_screen = TRUE,
-    min_height = 500
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
