@@ -2,7 +2,8 @@ missing_input_error <- function(id, error_message){
   shiny::div(
     class = "error-container", 
     bsicons::bs_icon("exclamation-circle-fill", class = "error-icon"),
-    shiny::div(id = id, class = "error-message", 
+    shiny::div(id = id, 
+               class = "error-message", 
                error_message)
   )
 }

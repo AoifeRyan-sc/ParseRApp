@@ -17,4 +17,54 @@
 
  .has-error .selectize-control .selectize-input {
         border-color: #d9534f;
- } /* need to implement this still
+ }
+ 
+/* Group Terms Visualization Styles */
+.gt-plot-container {
+  height: 100%;
+  width: 100%;
+}
+
+.shiny-spinner-output-container {
+  height: 100%;
+  width: 100%;
+}
+
+.shiny-spinner-output-container > div {
+  height: 100%;
+  width: 100%;
+}
+
+.shiny-plot-output {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Fullscreen-specific styles for bslib cards */
+.bslib-full-screen .card-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.bslib-full-screen .gt-plot-container {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Ensure the card body uses full height in fullscreen */
+.bslib-full-screen .card {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bslib-full-screen .card-header {
+  flex-shrink: 0;
+}
+
+.bslib-full-screen .card-body {
+  flex: 1;
+  overflow: hidden;
+}
