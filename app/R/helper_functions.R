@@ -7,7 +7,7 @@ create_terms_table <- function(terms, df, group_var, message_var){
       df %>%
         dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
         dplyr::mutate(Term = term) %>%
-        dplyr::select(Term, Group = group_var, message_var, clean_text) %>%
+        dplyr::select(Term, tidyselect::all_of(c(Group = group_var, message_var)), clean_text) %>%
         dplyr::collect()
     }) 
   } else {
@@ -15,7 +15,7 @@ create_terms_table <- function(terms, df, group_var, message_var){
       tmp <- df %>%
         dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(term, ignore_case = FALSE))) %>%
         dplyr::mutate(Term = term) %>%
-        dplyr::select(Term, message_var, clean_text) %>%
+        dplyr::select(Term, tidyselect::all_of(message_var), clean_text) %>%
         dplyr::collect()
     }) 
   } 
@@ -50,7 +50,7 @@ bigram_pairs <- function(bigram_output, df, message_var){
     df %>%
       dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(bigram_pairs, ignore_case = FALSE))) %>%
       dplyr::mutate(bigram_pairs = bigram_pairs) %>%
-      dplyr::select(bigram_pairs, message_var, clean_text) %>%
+      dplyr::select(bigram_pairs, tidyselect::all_of(message_var), clean_text) %>%
       dplyr::collect()
   })
     
