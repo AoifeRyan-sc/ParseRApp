@@ -15,9 +15,7 @@ bigramVizUi <- function(id){
         dropdown_title = "Bigram Inputs", 
         icon_info = "Click here for bigram customisation"
       ),
-      shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("bigram_card_layout"))
-      )
+      shiny::uiOutput(ns("bigram_card_layout"))
     ),
     full_screen = TRUE,
     style = "resize: vertical; overflow: auto;",
@@ -44,6 +42,7 @@ bigramVizServer <- function(id, r){
         r$bigram_calculated <- FALSE
         r$bigram <- NULL
         r$n_bigrams <- NULL
+        shinybusy::show_modal_spinner()
         
         if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
           r$bigram <- r$df %>%
@@ -57,6 +56,7 @@ bigramVizServer <- function(id, r){
           })
           r$n_bigrams <- length(r$bigram) 
         }
+        shinybusy::remove_modal_spinner()
         
         r$bigram_calculated <- TRUE
         
@@ -84,11 +84,20 @@ bigramVizServer <- function(id, r){
       if (r$n_bigrams > 1){
         nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
           bigram_name <- names(r$bigram)[i]
-          bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
+          bslib::nav_panel(
+            bigram_name, 
+            shinycssloaders::withSpinner(
+              shiny::plotOutput(ns(paste0("bigram_group_", i))),
+              fill = T
+              )
+          )
         })
         bslib::navset_underline(!!!nav_panels)
       } else {
-        shiny::plotOutput(ns("bigram_group_1"))
+        shinycssloaders::withSpinner(
+          shiny::plotOutput(ns("bigram_group_1")),
+          fill = T
+        )
       }
     }) # ui layout
     
@@ -100,9 +109,7 @@ bigramDataUi <- function(id){
   bslib::card(
     bslib::card_header("Bigram Data"),
     bslib::card_body(
-      shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("bigram_data_display")) 
-      )
+      shiny::uiOutput(ns("bigram_data_display")) 
     ),
     full_screen = TRUE,
     style = "resize: vertical; overflow: auto;",
@@ -157,14 +164,21 @@ bigramDataServer <- function(id, r){
       if (r$n_bigrams > 1){
         table_nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
           table_name <- names(r$bigram)[i]
-          bslib::nav_panel(table_name, DT::dataTableOutput(ns(paste0("bigram_data_table_", i))))
+          bslib::nav_panel(
+            table_name, 
+            shinycssloaders::withSpinner(
+              DT::dataTableOutput(ns(paste0("bigram_data_table_", i))))
+          )
         })
         
         return(bslib::navset_underline(
           !!!table_nav_panels
         ))
       } else {
-        return(DT::dataTableOutput(ns("bigram_data_table_1")))
+        return(
+          shinycssloaders::withSpinner(
+            DT::dataTableOutput(ns("bigram_data_table_1")))
+        )
       }
     }) # ui layout
     
