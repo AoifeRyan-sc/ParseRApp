@@ -15,10 +15,9 @@ bigramVizUi <- function(id){
         dropdown_title = "Bigram Inputs", 
         icon_info = "Click here for bigram customisation"
       ),
-      # shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("bigram_card_layout")),
-        # fill = T
-      # )
+      shinycssloaders::withSpinner(
+        shiny::uiOutput(ns("bigram_card_layout"))
+      )
     ),
     full_screen = TRUE,
     style = "resize: vertical; overflow: auto;",
@@ -79,26 +78,18 @@ bigramVizServer <- function(id, r){
   
       }) # bigram creation and reactive fiddling
     
-    # output$bigram_card_layout <- shiny::renderUI({
-    #   # req(r$bigram)
-    #   
-    #   if (r$n_bigrams > 1){
-    #     nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
-    #       bigram_name <- names(r$bigram)[i]
-    #       bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
-    #     })
-    #     bslib::navset_underline(!!!nav_panels)
-    #   } else {
-    #     shiny::plotOutput(ns("bigram_group_1"))
-    #   }
-    # }) # ui layout
-    
     output$bigram_card_layout <- shiny::renderUI({
       req(r$bigram)
-     shinycssloaders::withSpinner(
-       shiny::plotOutput(ns("bigram_group_1")),
-       fill = T
-     )
+      
+      if (r$n_bigrams > 1){
+        nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
+          bigram_name <- names(r$bigram)[i]
+          bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
+        })
+        bslib::navset_underline(!!!nav_panels)
+      } else {
+        shiny::plotOutput(ns("bigram_group_1"))
+      }
     }) # ui layout
     
     })
@@ -110,8 +101,7 @@ bigramDataUi <- function(id){
     bslib::card_header("Bigram Data"),
     bslib::card_body(
       shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("bigram_data_display")),
-        fill = T
+        shiny::uiOutput(ns("bigram_data_display")) 
       )
     ),
     full_screen = TRUE,
