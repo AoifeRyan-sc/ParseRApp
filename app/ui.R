@@ -41,7 +41,7 @@ ui <- bslib::page_sidebar(
     width = 1/2,
     heights_equal = "row",
     bigramVizUi("bigram_viz_card"),
-    # bigramDataUi("bigram_data_card")
+    bigramDataUi("bigram_data_card")
   ),
   bslib::layout_column_wrap(
     width = 1/2,

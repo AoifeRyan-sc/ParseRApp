@@ -11,7 +11,7 @@ server <- function(input, output, session) {
   dataUploadServer("data_upload_panel", r)
   dataDisplayServer("data_display_card", r)
   bigramVizServer("bigram_viz_card", r)
-  # bigramDataServer("bigram_data_card", r)
+  bigramDataServer("bigram_data_card", r)
   groupTermsVizServer("gt_viz_card", r)
   groupTermsDataServer("gt_data_card", r)
   wloVizServer("wlo_viz_card", r)
