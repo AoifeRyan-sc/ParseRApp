@@ -102,7 +102,7 @@ groupTermsVizServer <- function(id, r){
         paste0(input$gt_save_title, ".png")
       },
       content = function(file) {
-        ggplot2::ggsave(file, r$viz_gt, plot = , width = input$gt_save_width, bg = "white", height = input$gt_save_height, units = input$gt_save_units, dpi = 300)
+        ggplot2::ggsave(file, plot = r$viz_gt, width = input$gt_save_width, bg = "white", height = input$gt_save_height, units = input$gt_save_units, dpi = 300)
       }
     )
     

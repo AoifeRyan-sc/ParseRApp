@@ -94,7 +94,7 @@ bigramVizServer <- function(id, r){
               )
           )
         })
-        bslib::navset_underline(!!!nav_panels)
+        bslib::navset_underline(id = ns("bigram_panels"), !!!nav_panels)
       } else {
         shinycssloaders::withSpinner(
           shiny::plotOutput(ns("bigram_group_1")),
@@ -103,12 +103,30 @@ bigramVizServer <- function(id, r){
       }
     }) # ui layout
     
+    
     output$bigram_save <- shiny::downloadHandler(
+      
       filename = function(file) {
+        
         paste0(input$bigram_save_title, ".png")
       },
       content = function(file) {
-        ggplot2::ggsave(file, r$bigram_viz, plot = , width = input$bigram_save_width, bg = "white", height = input$bigram_save_height, units = input$bigram_save_units, dpi = 300)
+        
+        if (r$n_bigrams > 1) {
+          print("n > 1")
+          
+          active_tab <- input$bigram_panels
+          tab_number <- as.numeric(gsub("bigram_group_", "", active_tab))
+          
+          print(paste0("active tab: ", active_tab))
+          
+          plot_to_save <- ParseR::viz_ngram(r$bigram[[active_tab]]$viz)
+        } else {
+          print("n < 1")
+          plot_to_save <- r$bigram_viz
+        }
+
+        ggplot2::ggsave(file, plot = plot_to_save, width = input$bigram_save_width, bg = "white", height = input$bigram_save_height, units = input$bigram_save_units, dpi = 300)
       }
     )
     

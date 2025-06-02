@@ -73,7 +73,7 @@ wloVizServer <- function(id, r){
     })
     
     output$wlo_viz <- shiny::renderPlot({
-      r$viz_wlo
+      r$viz_wlo$viz
     })
     
     output$wlo_save <- shiny::downloadHandler(
@@ -81,7 +81,7 @@ wloVizServer <- function(id, r){
         paste0(input$wlo_save_title, ".png")
       },
       content = function(file) {
-        ggplot2::ggsave(file, r$viz_wlo, plot = , width = input$wlo_save_width, bg = "white", height = input$wlo_save_height, units = input$wlo_save_units, dpi = 300)
+        ggplot2::ggsave(file, plot =  r$viz_wlo$viz, width = input$wlo_save_width, bg = "white", height = input$wlo_save_height, units = input$wlo_save_units, dpi = 300)
       }
     )
     

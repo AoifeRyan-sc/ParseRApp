@@ -89,7 +89,7 @@ topTermsVizServer <- function(id, r){
         paste0(input$top_terms_save_title, ".png")
       },
       content = function(file) {
-        ggplot2::ggsave(file, r$top_terms_viz, plot = , width = input$top_terms_save_width, bg = "white", height = input$top_terms_save_height, units = input$top_terms_save_units, dpi = 300)
+        ggplot2::ggsave(file, plot = r$top_terms_viz, width = input$top_terms_save_width, bg = "white", height = input$top_terms_save_height, units = input$top_terms_save_units, dpi = 300)
       }
     )
     
