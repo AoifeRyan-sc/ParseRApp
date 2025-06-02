@@ -39,7 +39,7 @@ file_size_logic <- function(file, df, ns){
 
 col_check <- function(check_var, correct_var = c("date", "message", "author"), ns){
   shiny::showModal(shiny::modalDialog(
-    title = paste0("Are you sure ", check_var, " is the, ", correct_var, " variable you want to analyse?"),
+    title = paste0("Are you sure ", check_var, " is the ", correct_var, " variable you want to analyse?"),
     footer = shiny::tagList(
       shiny::actionButton(ns("reselect_var"), "Go back"),
       shiny::actionButton(ns("confirm_var"), "Yes, continue")

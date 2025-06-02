@@ -162,7 +162,7 @@ viz_top_terms_group <- function(top_terms, type = c("lollipops", "bars"), nrow =
   }
   
   plot <- plot +
-    ggplot2::facet_wrap(vars({{ group_var }}),
+    ggplot2::facet_wrap(ggplot2::vars({{ group_var }}),
                         scales = "free",
                         nrow = nrow) +
     ggplot2::coord_flip() +
