@@ -19,12 +19,15 @@ topTermsVizUi <- function(id){
         dropdown_title = "Top Term Inputs", 
         icon_info = "Click here for Top Term customisation"
       ), # need to add more parameters here
+      save_dropdown("top_terms", ns),
       shinycssloaders::withSpinner(
-        shiny::plotOutput(ns("top_terms_viz"))
+        shiny::plotOutput(ns("top_terms_viz")),
+        fill = T
       )
     ),
     full_screen = TRUE,
-    min_height = 500
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
@@ -78,10 +81,17 @@ topTermsVizServer <- function(id, r){
     })
     
     output$top_terms_viz <- shiny::renderPlot({
-      req(r$top_terms)
       r$top_terms_viz
-      
     })
+    
+    output$top_terms_save <- shiny::downloadHandler(
+      filename = function(file) {
+        paste0(input$top_terms_save_title, ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, r$top_terms_viz, plot = , width = input$top_terms_save_width, bg = "white", height = input$top_terms_save_height, units = input$top_terms_save_units, dpi = 300)
+      }
+    )
     
     
   })
@@ -96,10 +106,12 @@ topTermsDataUi <- function(id){
     bslib::card_body(
       shinycssloaders::withSpinner(
         shiny::uiOutput(ns("top_terms_data_output"))
-      )
+      ),
+      fill = T
     ),
     full_screen = TRUE,
-    min_height = 500
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
@@ -108,7 +120,7 @@ topTermsDataServer <- function(id, r){
     ns <- session$ns
     
     output$top_terms_data_output <- shiny::renderUI({
-      req(r$top_terms_viz)
+      # req(r$top_terms_viz)
       DT::dataTableOutput(ns("top_terms_data_display")) 
     })
     
@@ -120,7 +132,6 @@ topTermsDataServer <- function(id, r){
     
     output$top_terms_data_display <- DT::renderDataTable({
       req(r$top_terms_table)
-      print("rendering table")
       tt_table <- r$top_terms_table %>% 
         dplyr::mutate(Term = as.factor(Term))
       

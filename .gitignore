@@ -1,7 +1,9 @@
 .Rproj.user
 .Rhistory
 .RData
+.DS_Store
 .Ruserdata
 .Renviron
 app/rsconnect/
 token.txt
+working_docs/

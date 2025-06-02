@@ -15,9 +15,8 @@ bigramVizUi <- function(id){
         dropdown_title = "Bigram Inputs", 
         icon_info = "Click here for bigram customisation"
       ),
-      shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("bigram_card_layout"))
-      )
+      save_dropdown("bigram", ns),
+      shiny::uiOutput(ns("bigram_card_layout"))
     ),
     full_screen = TRUE,
     style = "resize: vertical; overflow: auto;",
@@ -44,6 +43,7 @@ bigramVizServer <- function(id, r){
         r$bigram_calculated <- FALSE
         r$bigram <- NULL
         r$n_bigrams <- NULL
+        shinybusy::show_modal_spinner()
         
         if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
           r$bigram <- r$df %>%
@@ -57,20 +57,22 @@ bigramVizServer <- function(id, r){
           })
           r$n_bigrams <- length(r$bigram) 
         }
+        shinybusy::remove_modal_spinner()
         
         r$bigram_calculated <- TRUE
         
         if (r$n_bigrams > 1){
           lapply(seq_along(r$bigram), function(i) {
             output[[paste0("bigram_group_", i)]] <- shiny::renderPlot({
-              req(r$bigram)
+              # req(r$bigram)
               ParseR::viz_ngram(r$bigram[[i]]$viz )
             })
           })
         } else {
           output$bigram_group_1 <- shiny::renderPlot({
-            req(r$bigram)
-            ParseR::viz_ngram(r$bigram$viz)
+            # req(r$bigram)
+            r$bigram_viz <- ParseR::viz_ngram(r$bigram$viz)
+            r$bigram_viz
           })
         } # render ui
       }
@@ -84,13 +86,31 @@ bigramVizServer <- function(id, r){
       if (r$n_bigrams > 1){
         nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
           bigram_name <- names(r$bigram)[i]
-          bslib::nav_panel(bigram_name, shiny::plotOutput(ns(paste0("bigram_group_", i))))
+          bslib::nav_panel(
+            bigram_name, 
+            shinycssloaders::withSpinner(
+              shiny::plotOutput(ns(paste0("bigram_group_", i))),
+              fill = T
+              )
+          )
         })
         bslib::navset_underline(!!!nav_panels)
       } else {
-        shiny::plotOutput(ns("bigram_group_1"))
+        shinycssloaders::withSpinner(
+          shiny::plotOutput(ns("bigram_group_1")),
+          fill = T
+        )
       }
     }) # ui layout
+    
+    output$bigram_save <- shiny::downloadHandler(
+      filename = function(file) {
+        paste0(input$bigram_save_title, ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, r$bigram_viz, plot = , width = input$bigram_save_width, bg = "white", height = input$bigram_save_height, units = input$bigram_save_units, dpi = 300)
+      }
+    )
     
     })
 }
@@ -100,9 +120,7 @@ bigramDataUi <- function(id){
   bslib::card(
     bslib::card_header("Bigram Data"),
     bslib::card_body(
-      shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("bigram_data_display")) 
-      )
+      shiny::uiOutput(ns("bigram_data_display")) 
     ),
     full_screen = TRUE,
     style = "resize: vertical; overflow: auto;",
@@ -157,14 +175,21 @@ bigramDataServer <- function(id, r){
       if (r$n_bigrams > 1){
         table_nav_panels <- lapply(seq_len(r$n_bigrams), function(i) {
           table_name <- names(r$bigram)[i]
-          bslib::nav_panel(table_name, DT::dataTableOutput(ns(paste0("bigram_data_table_", i))))
+          bslib::nav_panel(
+            table_name, 
+            shinycssloaders::withSpinner(
+              DT::dataTableOutput(ns(paste0("bigram_data_table_", i))))
+          )
         })
         
         return(bslib::navset_underline(
           !!!table_nav_panels
         ))
       } else {
-        return(DT::dataTableOutput(ns("bigram_data_table_1")))
+        return(
+          shinycssloaders::withSpinner(
+            DT::dataTableOutput(ns("bigram_data_table_1")))
+        )
       }
     }) # ui layout
     

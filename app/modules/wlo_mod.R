@@ -19,12 +19,15 @@ wloVizUi <- function(id){
         dropdown_title = "Weighted Log Odds Inputs", 
         icon_info = "Click here for WLO customisation"
       ), # need to add more parameters here
+      save_dropdown("wlo", ns),
       shinycssloaders::withSpinner(
-        shiny::plotOutput(ns("wlo_viz"))
+        shiny::plotOutput(ns("wlo_viz")),
+        fill = T
       )
     ),
     full_screen = TRUE,
-    min_height = 500
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
@@ -70,9 +73,17 @@ wloVizServer <- function(id, r){
     })
     
     output$wlo_viz <- shiny::renderPlot({
-      req(r$viz_wlo)
       r$viz_wlo
     })
+    
+    output$wlo_save <- shiny::downloadHandler(
+      filename = function(file) {
+        paste0(input$wlo_save_title, ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, r$viz_wlo, plot = , width = input$wlo_save_width, bg = "white", height = input$wlo_save_height, units = input$wlo_save_units, dpi = 300)
+      }
+    )
     
     
   })
@@ -86,11 +97,13 @@ wloDataUi <- function(id){
       shiny::HTML("Weighted Log Odds Data")),
     bslib::card_body(
       shinycssloaders::withSpinner(
-        shiny::uiOutput(ns("wlo_data_output"))
+        shiny::uiOutput(ns("wlo_data_output")),
+        fill = T
       )
     ),
     full_screen = TRUE,
-    min_height = 500
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
@@ -99,7 +112,7 @@ wloDataServer <- function(id, r){
     ns <- session$ns
     
     output$wlo_data_output <- shiny::renderUI({
-      req(r$viz_wlo)
+      # req(r$viz_wlo)
       DT::dataTableOutput(ns("wlo_data_display")) 
     })
     

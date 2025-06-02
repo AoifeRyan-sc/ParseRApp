@@ -4,6 +4,7 @@ groupTermsVizUi <- function(id){
     bslib::card_header(
       shiny::HTML("Group Terms <i>(make selections in dropdown to render)</i>")),
     bslib::card_body(
+      class = "d-flex flex-column h-100",
       dropdownButton_with_tooltip(
         select_input_with_tooltip(id = ns("gt_group_column"), title = "Group Column*",
                                   icon_info = "The name of the column with the groups you want to compare."),
@@ -13,9 +14,6 @@ groupTermsVizUi <- function(id){
         text_input_with_tooltip(id = ns("gt_selected_terms"), "Emphasise terms:", 
                                 icon_info = "Any terms you want to stand out in the output chart.",
                                 placeholder = "hispanic, heritage"),
-        # text_input_with_tooltip(id = ns("gt_group_colour"), "Group Colours:", 
-        #                         icon_info = "The HEX code for the group node colour.",
-        #                         value = "#FFFF00"), # need to implement a per term box
         text_input_with_tooltip(id = ns("gt_term_colour"), "Term Colours:", 
                                 icon_info = "The HEX code for the terms.",
                                 value = "#000000"),
@@ -25,13 +23,16 @@ groupTermsVizUi <- function(id){
         shiny::actionButton(ns("gt_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"
-      ), # need to add more parameters here
+      ),
+      save_dropdown("gt", ns),
       shinycssloaders::withSpinner(
-        shiny::plotOutput(ns("gt_viz"))
+        shiny::plotOutput(ns("gt_viz")),
+        fill = T
       )
     ),
     full_screen = TRUE,
-    min_height = 500
+    style = "resize: vertical; overflow: auto;",
+    height = "500px"
   )
 }
 
@@ -42,6 +43,10 @@ groupTermsVizServer <- function(id, r){
     shiny::observe({
       shiny::req(r$df)
       shiny::updateSelectizeInput(session = session, "gt_group_column", choices = colnames(r$df), selected = NULL)
+    })
+    output$gt_viz <- shiny::renderPlot({
+      plot.new()  # Empty plot
+      text(0.5, 0.5, "Click the 'Plot' button to generate visualization", cex = 1.2)
     })
     
     shiny::observeEvent(input$gt_action, {
@@ -89,11 +94,17 @@ groupTermsVizServer <- function(id, r){
     })
     
     output$gt_viz <- shiny::renderPlot({
-      req(r$viz_gt)
       r$viz_gt
     })
     
-    
+    output$gt_save <- shiny::downloadHandler(
+      filename = function(file) {
+        paste0(input$gt_save_title, ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, r$viz_gt, plot = , width = input$gt_save_width, bg = "white", height = input$gt_save_height, units = input$gt_save_units, dpi = 300)
+      }
+    )
     
   })
   
