@@ -24,6 +24,7 @@ groupTermsVizUi <- function(id){
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"
       ),
+      save_dropdown("gt", ns),
       shinycssloaders::withSpinner(
         shiny::plotOutput(ns("gt_viz")),
         fill = T
@@ -96,7 +97,14 @@ groupTermsVizServer <- function(id, r){
       r$viz_gt
     })
     
-    
+    output$gt_save <- shiny::downloadHandler(
+      filename = function(file) {
+        paste0(input$gt_save_title, ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, r$viz_gt, plot = , width = input$gt_save_width, bg = "white", height = input$gt_save_height, units = input$gt_save_units, dpi = 300)
+      }
+    )
     
   })
   

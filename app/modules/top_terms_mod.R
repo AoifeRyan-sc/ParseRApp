@@ -19,6 +19,7 @@ topTermsVizUi <- function(id){
         dropdown_title = "Top Term Inputs", 
         icon_info = "Click here for Top Term customisation"
       ), # need to add more parameters here
+      save_dropdown("top_terms", ns),
       shinycssloaders::withSpinner(
         shiny::plotOutput(ns("top_terms_viz")),
         fill = T
@@ -82,6 +83,15 @@ topTermsVizServer <- function(id, r){
     output$top_terms_viz <- shiny::renderPlot({
       r$top_terms_viz
     })
+    
+    output$top_terms_save <- shiny::downloadHandler(
+      filename = function(file) {
+        paste0(input$top_terms_save_title, ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, r$top_terms_viz, plot = , width = input$top_terms_save_width, bg = "white", height = input$top_terms_save_height, units = input$top_terms_save_units, dpi = 300)
+      }
+    )
     
     
   })

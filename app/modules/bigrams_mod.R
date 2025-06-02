@@ -15,6 +15,7 @@ bigramVizUi <- function(id){
         dropdown_title = "Bigram Inputs", 
         icon_info = "Click here for bigram customisation"
       ),
+      save_dropdown("bigram", ns),
       shiny::uiOutput(ns("bigram_card_layout"))
     ),
     full_screen = TRUE,
@@ -70,7 +71,8 @@ bigramVizServer <- function(id, r){
         } else {
           output$bigram_group_1 <- shiny::renderPlot({
             # req(r$bigram)
-            ParseR::viz_ngram(r$bigram$viz)
+            r$bigram_viz <- ParseR::viz_ngram(r$bigram$viz)
+            r$bigram_viz
           })
         } # render ui
       }
@@ -100,6 +102,15 @@ bigramVizServer <- function(id, r){
         )
       }
     }) # ui layout
+    
+    output$bigram_save <- shiny::downloadHandler(
+      filename = function(file) {
+        paste0(input$bigram_save_title, ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, r$bigram_viz, plot = , width = input$bigram_save_width, bg = "white", height = input$bigram_save_height, units = input$bigram_save_units, dpi = 300)
+      }
+    )
     
     })
 }

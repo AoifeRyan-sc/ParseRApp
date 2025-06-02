@@ -130,3 +130,39 @@ dropdownButton_with_tooltip <- function(..., dropdown_title, icon_info){
     )
   )
 }
+
+saveButton_with_tooltip <- function(..., icon_info){
+  shiny::div(
+    style = "position: absolute; top: 3px; right: 75px;",
+    bslib::tooltip(
+      shinyWidgets::dropdownButton(
+        label= "",
+        circle = TRUE,
+        size = "sm",
+        icon = shiny::icon("download"),
+        width = "200px",
+        status = "primary",
+        tags$style(HTML("
+          .dropdown-toggle::after {
+            display: none !important;
+          }
+        ")),
+        ...
+      ),
+      icon_info
+    )
+  )
+}
+
+
+save_dropdown <- function(plot_title, ns){
+  saveButton_with_tooltip(
+    shiny::textInput(ns(paste0(plot_title, "_save_title")), "Save as", value = paste0(plot_title, "")),
+    shiny::selectizeInput(ns(paste0(plot_title, "_save_units")), "Units", choices = c("in", "mm"), selected = "in"),
+    shiny::numericInput(ns(paste0(plot_title, "_save_width")), label = "Width", value = 6),
+    shiny::numericInput(ns(paste0(plot_title, "_save_height")), label = "Height", value = 4),
+    shiny::downloadButton(ns(paste0(plot_title, "_save")), "Save", icon = shiny::icon("download")),
+    icon_info = paste0("Click here to save ", plot_title)
+  )
+}
+
