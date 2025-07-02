@@ -79,21 +79,25 @@ dataUploadServer <- function(id, r){
         # }
         
         else {
-          shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+          print(paste("lemma?", input$lemmatise_text))
+          
+          r$df <- process_df(df = r$df, 
+                             message_var = rlang::sym(r$text_var), 
+                             con = r$con, 
+                             df_con_name = "master_df", 
+                             lemmatise = input$lemmatise_text, 
+                             language = input$lemma_language, 
+                             duckdb = T
+                             )
+          
 
-          df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
-          if (input$lemmatise_text == 1){
-            message("lemmatise")
-            print(input$lemma_language)
-            print(class(input$lemma_language))
-            df_clean <- lemmatise_df(df = df_clean, message_var = clean_text, language = input$lemma_language, duckdb = F)
-          }
+          # df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = duckdb)
+          # 
+          # if (input$lemmatise_text == 1){
+          #   df_clean <- lemmatise_df(df = df_clean, message_var = clean_text, language = input$lemma_language, duckdb = F)
+          # }
 
-          make_duckdb(df = df_clean, con = r$con, name = "master_df")
-          r$df <- dplyr::tbl(r$con, "master_df")
-
-          shinybusy::remove_modal_spinner()
-          shiny::showNotification("Text cleaning completed!", type = "message")
+         
         }
       
         } else {
