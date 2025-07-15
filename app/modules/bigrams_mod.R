@@ -11,6 +11,11 @@ bigramVizUi <- function(id){
                                    icon_info = shiny::HTML("The minimum number of times an n-gram must be observed to be included. Think about the size of the dataset you're making a bigram for, is a bigram pair appearing 10 times significant? Would you want to look at pairs that occur more or less than this?.\n\n<i>Note: Be aware of long text chains, they likely represent spam you want to remove.</i>")),
         numeric_input_with_tooltip(ns("bigram_top_n"), "Number of bigrams:", default_value = 25,
                                    icon_info = "The number of n-grams to include."),
+        shiny::conditionalPanel(
+          condition = "input['data_upload_panel-lemmatise_text'] == 1", ns = ns,
+          input_switch_with_tooltop(id = ns("bigram_use_lemma"), title = "Use lemmatised text?", on = T, 
+                                    icon_info = "You lemmatised your text when uploading the data, do you want to use the lemmatised text to greate the plot?")
+        ),
         shiny::actionButton(ns("bigram_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Bigram Inputs", 
         icon_info = "Click here for bigram customisation"
@@ -44,26 +49,16 @@ bigramVizServer <- function(id, r){
         r$bigram <- NULL
         r$n_bigrams <- NULL
         shinybusy::show_modal_spinner()
-
-        text_var <- ifelse("text_lemma" %in% colnames(r$df), "text_lemma", "clean_text")
         
         if (is.null(input$bigram_group_column) | input$bigram_group_column == "none"){
-          r$bigram <- count_ngram_app(
-              dplyr::collect(r$df),
-              text_var = text_var,
-              top_n = input$bigram_top_n, 
-              min_freq = input$bigram_min_freq
-              )
+          r$bigram <- r$df %>%
+            dplyr::collect() %>%
+            count_ngram_app(text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
           r$n_bigrams <- 1
         } else {
           df_groups <- split(dplyr::collect(r$df), dplyr::collect(r$df)[input$bigram_group_column])
           r$bigram <- lapply(df_groups, function(group_df) {
-            count_ngram_app(
-              df = group_df, 
-              text_var = text_var,
-              top_n = input$bigram_top_n, 
-              min_freq = input$bigram_min_freq
-            )
+            count_ngram_app(df = group_df, text_var = clean_text, top_n = input$bigram_top_n, min_freq = input$bigram_min_freq)
           })
           r$n_bigrams <- length(r$bigram) 
         }
@@ -174,11 +169,10 @@ bigramDataServer <- function(id, r){
         
         lapply(seq_along(r$bigram_table), function(i) {
           output[[paste0("bigram_data_table_", i)]] <- DT::renderDataTable({
-            table <- r$bigram_table[[i]] %>% dplyr::collect() 
-            if (nrow(table) > 0) {
-              table <- table %>% dplyr::mutate(bigram_pairs = as.factor(bigram_pairs)) 
-            }
-            table %>% datatable_display_app()
+            r$bigram_table[[i]] %>%
+              dplyr::collect() %>%
+              dplyr::mutate(bigram_pairs = as.factor(bigram_pairs)) %>%
+              datatable_display_app()
           })
         })
         
@@ -187,11 +181,10 @@ bigramDataServer <- function(id, r){
         r$bigram_table <- bigram_pairs(r$bigram$view, r$df, r$text_var)
         
         output$bigram_data_table_1 <- DT::renderDataTable({
-          table <- r$bigram_table %>% dplyr::collect() 
-            if (nrow(table) > 0) {
-              table <- table %>% dplyr::mutate(bigram_pairs = as.factor(bigram_pairs)) 
-            }
-            table %>% datatable_display_app()
+          r$bigram_table %>%
+            dplyr::collect() %>%
+            dplyr::mutate(bigram_pairs = as.factor(bigram_pairs)) %>%
+            datatable_display_app()
         })
         
       } # create tables and ui layout
