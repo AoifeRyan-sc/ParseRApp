@@ -100,7 +100,6 @@ dataUploadServer <- function(id, r){
     }) # clean text - maybe need to change
     
     shiny::observeEvent(input$confirm_var , {
-      message("test")
       shiny::removeModal()
       
       r$text_var <- input$text_column
@@ -108,13 +107,8 @@ dataUploadServer <- function(id, r){
       r$sender_var <- input$author_column
       
       shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
-      message("something should happen")
-      print("lemma value:", input$lemmatise_text)
+      
       df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
-      if (input$lemmatise_text == 1){
-        message("lemmatise")
-        df_clean <- lemmatise_df(df = df_clean, message_var = rlang::sym(r$text_var), duckdb = F)
-      }
       
       make_duckdb(df = df_clean, con = r$con, name = "master_df")
       r$df <- dplyr::tbl(r$con, "master_df")

@@ -260,28 +260,6 @@ clean_df <- function(df, message_var, duckdb = F){
   return(df)
 }
 
-lemmatise_df <- function(df, message_var, language = c("english", "spanish"), duckdb = F){
-  
-  model = LimpiaR::limpiar_pos_import_model(language = language)
-  df <- df %>% mutate(.docid = dplyr::row_number())
-  ud_annotate <- LimpiaR::limpiar_pos_annotate(
-    data = df,
-    text_var = clean_text,
-    id_var = .docid,
-    pos_model = model,
-    in_parallel = F, # would it cause complications down the line?
-    dependency_parse = F,
-    update_progress = 5000
-    )
-  
-  df_lemma <- ud_annotate %>%
-    dplyr::group_by(.docid) %>%
-    dplyr::summarise(text_lemma = paste0(lemma, collapse = " ")) %>%
-    dplyr::left_join(df, by = ".docid")
-  
-  return(df_lemma)
-}
-
 make_duckdb <- function(df, con, name){
   duckdb::dbWriteTable(
     conn = con,
