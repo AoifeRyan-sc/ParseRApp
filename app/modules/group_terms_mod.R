@@ -20,11 +20,6 @@ groupTermsVizUi <- function(id){
         text_input_with_tooltip(id = ns("gt_emphasis_colour"), "Emphasised Term Colours:", 
                                 icon_info = "The HEX code for any emphasised terms.",
                                 value = "#FFC0CB"),
-        shiny::conditionalPanel(
-          condition = "input.lemmatise_text", ns = ns,
-          input_switch_with_tooltop(id = ns("gt_use_lemma"), title = "Use lemmatised text?", on = T, 
-                                    icon_info = "You lemmatised your text when uploading the data, do you want to use the lemmatised text to greate the plot?")
-        ),
         shiny::actionButton(ns("gt_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"
@@ -81,12 +76,11 @@ groupTermsVizServer <- function(id, r){
         } else {
           strsplit(input$gt_selected_terms, ",\\s*")[[1]]
         }
-        
+        text_var <- ifelse("text_lemma" %in% colnames(r$df), "text_lemma", "clean_text")
         r$viz_gt <- ParseR::viz_group_terms_network(
           data = dplyr::collect(r$df),
           group_var = !!rlang::sym(r$gt_group_var),
-          # text_var = !!rlang::sym(r$text_var),
-          text_var = clean_text,
+          text_var =  !!rlang::sym(text_var),
           n_terms = input$gt_n_terms,
           text_size = 4,
           with_ties = FALSE, # need to add customisation for all of this

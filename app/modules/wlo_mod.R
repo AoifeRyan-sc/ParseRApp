@@ -59,10 +59,10 @@ wloVizServer <- function(id, r){
       }
       else {
         output$gt_group_missing_error <- shiny::renderUI({})
-        
+        text_var <- ifelse("text_lemma" %in% colnames(r$df), "text_lemma", "clean_text")
         r$viz_wlo <- ParseR::calculate_wlos(
           df = dplyr::collect(r$df),
-          text_var = clean_text,
+          text_var = !!rlang::sym(text_var),
           topic_var = !!rlang::sym(r$wlo_group_var),
           top_n = 30,
           filter_by = input$wlo_filter,
