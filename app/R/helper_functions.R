@@ -282,26 +282,6 @@ lemmatise_df <- function(df, message_var, language = c("english", "spanish"), du
   return(df_lemma)
 }
 
-process_df <- function(df, message_var, con, df_con_name, lemmatise = T, language = c("english", "spanish"), duckdb = F){
-  
-  shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
-  
-  df_clean <- clean_df(df = df, message_var = message_var, duckdb = duckdb)
-  
-  if (lemmatise){
-    message("lemma-ing")
-    df_clean <- lemmatise_df(df = df_clean, message_var = clean_text, language = language, duckdb = F)
-  }
-  
-  make_duckdb(df = df_clean, con = con, name = df_con_name)
-  con_df <- dplyr::tbl(con, df_con_name)
-  
-  shinybusy::remove_modal_spinner()
-  shiny::showNotification("Text cleaning completed!", type = "message")
-  
-  return(con_df)
-}
-
 make_duckdb <- function(df, con, name){
   duckdb::dbWriteTable(
     conn = con,
