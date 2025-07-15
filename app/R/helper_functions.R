@@ -46,12 +46,11 @@ convert_to_factor <- function(x, factor){
 bigram_pairs <- function(bigram_output, df, message_var){
 
   bigram_pairs <- paste(bigram_output$word1, bigram_output$word2, sep = " ")
-  text_var <- ifelse("text_lemma" %in% colnames(df), "text_lemma", "clean_text")
   bigram_df <- purrr::map_dfr(bigram_pairs, function(bigram_pairs) {
     df %>%
-      dplyr::filter(stringr::str_detect(!!rlang::sym(text_var), stringr::fixed(bigram_pairs, ignore_case = FALSE))) %>%
+      dplyr::filter(stringr::str_detect(clean_text, stringr::fixed(bigram_pairs, ignore_case = FALSE))) %>%
       dplyr::mutate(bigram_pairs = bigram_pairs) %>%
-      dplyr::select(bigram_pairs, tidyselect::all_of(message_var), text_var) %>%
+      dplyr::select(bigram_pairs, tidyselect::all_of(message_var), clean_text) %>%
       dplyr::collect()
   })
     
@@ -113,14 +112,8 @@ get_wlo_terms <- function(wlo_view){
 # top terms ----
 make_top_terms <- function(df, n_terms, group_var = NULL, group = F){
   
-  text_var <- ifelse("text_lemma" %in% colnames(df), "text_lemma", "clean_text")
-  
   all_terms <- df %>% 
-    tidytext::unnest_tokens(
-      output = word, 
-      input = !!rlang::sym(text_var),
-      token = "words", 
-      to_lower = FALSE)
+    tidytext::unnest_tokens(output = word, input = clean_text, token = "words", to_lower = FALSE)
   
   if (group){
     all_terms <- all_terms %>% dplyr::group_by({{ group_var }})
@@ -283,7 +276,7 @@ lemmatise_df <- function(df, language = c("english", "spanish"), duckdb = F){
     pos_model = model,
     in_parallel = F, # would it cause complications down the line?
     dependency_parse = F,
-    update_progress = 1000
+    update_progress = 5000
     )
   
   df_lemma <- ud_annotate %>%
