@@ -71,10 +71,33 @@ dataUploadServer <- function(id, r){
         
         if (!tolower(r$text_var) %in% c("message", "text")){
           col_check(check_var = r$text_var, correct_var = "message", ns = ns)  
-        }
+        } 
+        # else if (isTruthy(r$sender_var) &!tolower(r$date_var) %in% c("screen_name", "screen name", "sender screen name", "sender_screen_name")){
+        #   col_check(check_var = r$sender_var, correct_var = "author", ns = ns)
+        # } else if (isTruthy(r$date_var) &!tolower(r$date_var) %in% c("date", "created time", "created_time", "createdtime")){
+        #   col_check(check_var = r$date_var, correct_var = "date", ns = ns)
+        # }
         
         else {
-          r$df <- process_df(df = r$df, message_var = rlang::sym(r$text_var), con = r$con, df_con_name = "master_df", lemmatise = input$lemmatise_text, language = input$lemma_language, duckdb = T)
+          print(paste("lemma?", input$lemmatise_text))
+          
+          r$df <- process_df(df = r$df, 
+                             message_var = rlang::sym(r$text_var), 
+                             con = r$con, 
+                             df_con_name = "master_df", 
+                             lemmatise = input$lemmatise_text, 
+                             language = input$lemma_language, 
+                             duckdb = T
+                             )
+          
+
+          # df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = duckdb)
+          # 
+          # if (input$lemmatise_text == 1){
+          #   df_clean <- lemmatise_df(df = df_clean, message_var = clean_text, language = input$lemma_language, duckdb = F)
+          # }
+
+         
         }
       
         } else {
@@ -93,7 +116,19 @@ dataUploadServer <- function(id, r){
       r$date_var <- input$date_column
       r$sender_var <- input$author_column
       
-      r$df <- process_df(df = r$df, message_var = rlang::sym(r$text_var), con = r$con, df_con_name = "master_df", lemmatise = input$lemmatise_text, language = input$lemma_language, duckdb = T)
+      shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+      df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
+      if (input$lemmatise_text == 1){
+        message("lemmatise")
+        print(class(r$lemma_language))
+        # df_clean <- lemmatise_df(df = df_clean, message_var = clean_text, language = r$lemma_language, duckdb = F)
+      }
+      
+      make_duckdb(df = df_clean, con = r$con, name = "master_df")
+      r$df <- dplyr::tbl(r$con, "master_df")
+      
+      shinybusy::remove_modal_spinner()
+      shiny::showNotification("Text cleaning completed!", type = "message")
     })
     
     shiny::observeEvent(input$reselect_var, {

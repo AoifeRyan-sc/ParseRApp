@@ -11,11 +11,6 @@ bigramVizUi <- function(id){
                                    icon_info = shiny::HTML("The minimum number of times an n-gram must be observed to be included. Think about the size of the dataset you're making a bigram for, is a bigram pair appearing 10 times significant? Would you want to look at pairs that occur more or less than this?.\n\n<i>Note: Be aware of long text chains, they likely represent spam you want to remove.</i>")),
         numeric_input_with_tooltip(ns("bigram_top_n"), "Number of bigrams:", default_value = 25,
                                    icon_info = "The number of n-grams to include."),
-        shiny::conditionalPanel(
-          condition = "input['data_upload_panel-lemmatise_text'] == 1", ns = ns,
-          input_switch_with_tooltop(id = ns("bigram_use_lemma"), title = "Use lemmatised text?", on = T, 
-                                    icon_info = "You lemmatised your text when uploading the data, do you want to use the lemmatised text to greate the plot?")
-        ),
         shiny::actionButton(ns("bigram_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Bigram Inputs", 
         icon_info = "Click here for bigram customisation"

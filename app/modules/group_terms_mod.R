@@ -20,11 +20,6 @@ groupTermsVizUi <- function(id){
         text_input_with_tooltip(id = ns("gt_emphasis_colour"), "Emphasised Term Colours:", 
                                 icon_info = "The HEX code for any emphasised terms.",
                                 value = "#FFC0CB"),
-        shiny::conditionalPanel(
-          condition = "input.lemmatise_text", ns = ns,
-          input_switch_with_tooltop(id = ns("gt_use_lemma"), title = "Use lemmatised text?", on = T, 
-                                    icon_info = "You lemmatised your text when uploading the data, do you want to use the lemmatised text to greate the plot?")
-        ),
         shiny::actionButton(ns("gt_action"), "Plot", icon = shiny::icon("magnifying-glass-chart")),
         dropdown_title = "Group Terms Inputs", 
         icon_info = "Click here for Group Terms customisation"
