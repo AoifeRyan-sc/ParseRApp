@@ -1,5 +1,6 @@
 # Base image
-FROM --platform=linux/amd64 rocker/shiny
+##FROM --platform=linux/amd64 rocker/shiny
+FROM rocker/r-ver:4.4.3
 
 # Install system libraries
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
