@@ -236,7 +236,7 @@ load_data <- function(r){
 clean_df <- function(df, message_var, duckdb = F){
   
   df <- df %>%
-    dplyr::mutate(clean_text = message_var, .after = message_var) %>%
+    dplyr::mutate(clean_text = message_var) %>%
     ParseR::clean_text(
       text_var = clean_text,
       tolower = T, # should make some of this customisable
@@ -244,31 +244,26 @@ clean_df <- function(df, message_var, duckdb = F){
       remove_punctuation = T,
       remove_digits = T,
       in_parallel = F # be aware if we are deploying this - does this work with duckdb?
-    ) # have seen analyst dfs with all blank space
+    ) 
   
   if (duckdb){
     df <- df %>%
       dplyr::collect() %>%
       dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
-      LimpiaR::limpiar_spaces(clean_text) %>%
-      dplyr::filter(!is.na(clean_text))  %>%
-      dplyr::filter(!grepl("^\\s*$", clean_text))
+      LimpiaR::limpiar_spaces(clean_text)
   } else {
     df <- df %>%
       dplyr::mutate(clean_text = tm::removeWords(clean_text, tm::stopwords(kind = "SMART"))) %>%
-      LimpiaR::limpiar_spaces(clean_text) %>%
-      dplyr::filter(!is.na(clean_text))  %>%
-      dplyr::filter(!grepl("^\\s*$", clean_text))
+      LimpiaR::limpiar_spaces(clean_text)
   }
   
   return(df)
 }
 
-lemmatise_df <- function(df, language = c("english", "spanish"), duckdb = F){
+lemmatise_df <- function(df, message_var, language = c("english", "spanish"), duckdb = F){
   
   model = LimpiaR::limpiar_pos_import_model(language = language)
-  df <- df %>% dplyr::mutate(.docid = dplyr::row_number())
-  print(nrow(df))
+  df <- df %>% mutate(.docid = dplyr::row_number())
   ud_annotate <- LimpiaR::limpiar_pos_annotate(
     data = df,
     text_var = clean_text,
@@ -282,10 +277,8 @@ lemmatise_df <- function(df, language = c("english", "spanish"), duckdb = F){
   df_lemma <- ud_annotate %>%
     dplyr::group_by(.docid) %>%
     dplyr::summarise(text_lemma = paste0(lemma, collapse = " ")) %>%
-    dplyr::left_join(df, by = ".docid") %>%
-    dplyr::select(-.docid) %>%
-    dplyr::relocate(text_lemma, .after = clean_text)
-
+    dplyr::left_join(df, by = ".docid")
+  
   return(df_lemma)
 }
 
@@ -293,21 +286,19 @@ process_df <- function(df, message_var, con, df_con_name, lemmatise = T, languag
   
   shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
   
-  message("cleaning data & removing empty entries...")
   df_clean <- clean_df(df = df, message_var = message_var, duckdb = duckdb)
   
   if (lemmatise){
-    message("lemmatising")
-    df_clean <- lemmatise_df(df = df_clean, language = language, duckdb = F)
+    message("lemma-ing")
+    df_clean <- lemmatise_df(df = df_clean, message_var = clean_text, language = language, duckdb = F)
   }
-  
   
   make_duckdb(df = df_clean, con = con, name = df_con_name)
   con_df <- dplyr::tbl(con, df_con_name)
-
+  
   shinybusy::remove_modal_spinner()
   shiny::showNotification("Text cleaning completed!", type = "message")
-
+  
   return(con_df)
 }
 
