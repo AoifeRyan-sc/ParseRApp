@@ -273,9 +273,13 @@ clean_df <- function(df, message_var, duckdb = F){
 
 lemmatise_df <- function(df, language = c("english", "spanish"), duckdb = F){
   
-  model = LimpiaR::limpiar_pos_import_model(language = language)
+  
+  model_dir <- paste0("models/", language, "-ewt-ud-2.5-191206.udpipe")
+  
+  model = udpipe::udpipe_load_model(model_dir)
+  
   df <- df %>% dplyr::mutate(.docid = dplyr::row_number())
-  print(nrow(df))
+  
   ud_annotate <- LimpiaR::limpiar_pos_annotate(
     data = df,
     text_var = clean_text,

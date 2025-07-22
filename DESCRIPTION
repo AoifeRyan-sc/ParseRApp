@@ -29,4 +29,5 @@ Imports:
     shinycssloaders,
     shinyWidgets,
     tm,
-    tools
+    tools,
+    udpipe
