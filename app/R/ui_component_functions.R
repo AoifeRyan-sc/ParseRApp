@@ -30,7 +30,8 @@ file_size_logic <- function(file, df, ns){
         condition = "input.lemmatise_text == 1", ns = ns,
         shiny::radioButtons(ns("lemma_language"), 
                             label = "Lemmatisation Language",
-                            choices = c("English" = "english", "Spanish" = "spanish"),
+                            choices = c("English" = "english"),
+                                        # , "Spanish" = "spanish"), # not implementing yet
                             selected = "english")
       ),
       footer = shiny::tagList(
