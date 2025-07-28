@@ -260,6 +260,57 @@ clean_df <- function(df, message_var, duckdb = F){
   return(df)
 }
 
+lemmatise_df <- function(df, language = c("english", "spanish"), duckdb = F){
+  
+  
+  model_dir <- paste0("models/", language, "-ewt-ud-2.5-191206.udpipe")
+  
+  model = udpipe::udpipe_load_model(model_dir)
+  
+  df <- df %>% dplyr::mutate(.docid = dplyr::row_number())
+  
+  ud_annotate <- LimpiaR::limpiar_pos_annotate(
+    data = df,
+    text_var = clean_text,
+    id_var = .docid,
+    pos_model = model,
+    in_parallel = F, # would it cause complications down the line?
+    dependency_parse = F,
+    update_progress = 1000
+    )
+  
+  df_lemma <- ud_annotate %>%
+    dplyr::group_by(.docid) %>%
+    dplyr::summarise(text_lemma = paste0(lemma, collapse = " ")) %>%
+    dplyr::left_join(df, by = ".docid") %>%
+    dplyr::select(-.docid) %>%
+    dplyr::relocate(text_lemma, .after = clean_text)
+
+  return(df_lemma)
+}
+
+process_df <- function(df, message_var, con, df_con_name, lemmatise = T, language = c("english", "spanish"), duckdb = F){
+  
+  shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
+  
+  message("cleaning data & removing empty entries...")
+  df_clean <- clean_df(df = df, message_var = message_var, duckdb = duckdb)
+  
+  if (lemmatise){
+    message("lemmatising")
+    df_clean <- lemmatise_df(df = df_clean, language = language, duckdb = F)
+  }
+  
+  
+  make_duckdb(df = df_clean, con = con, name = df_con_name)
+  con_df <- dplyr::tbl(con, df_con_name)
+
+  shinybusy::remove_modal_spinner()
+  shiny::showNotification("Text cleaning completed!", type = "message")
+
+  return(con_df)
+}
+
 make_duckdb <- function(df, con, name){
   duckdb::dbWriteTable(
     conn = con,

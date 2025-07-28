@@ -24,6 +24,16 @@ file_size_logic <- function(file, df, ns){
       select_input_with_tooltip(id = ns("date_column"), title = "Date Column",
                                 icon_info = "The name of the date column",
                                 choice_list = colnames(df)),
+      input_switch_with_tooltop(id = ns("lemmatise_text"), title = "Lemmatise Text?", on = T, 
+                                icon_info = "Lemmatisation is the process of grouping together different inflected forms of the same word e.g. 'girls' -> 'girl', 'walked' -> 'walk'."),
+      shiny::conditionalPanel(
+        condition = "input.lemmatise_text == 1", ns = ns,
+        shiny::radioButtons(ns("lemma_language"), 
+                            label = "Lemmatisation Language",
+                            choices = c("English" = "english"),
+                                        # , "Spanish" = "spanish"), # not implementing yet
+                            selected = "english")
+      ),
       footer = shiny::tagList(
         shiny::actionButton(ns("restart_app"), "Go back", class = "btn-danger"),
         shiny::actionButton(ns("confirm_input_cols"), "Go!", class = "btn-success")
