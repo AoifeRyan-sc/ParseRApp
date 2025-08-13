@@ -24,7 +24,7 @@ file_size_logic <- function(file, df, ns){
       select_input_with_tooltip(id = ns("date_column"), title = "Date Column",
                                 icon_info = "The name of the date column",
                                 choice_list = colnames(df)),
-      input_switch_with_tooltop(id = ns("lemmatise_text"), title = "Lemmatise Text?", on = T, 
+      input_switch_with_tooltip(id = ns("lemmatise_text"), title = "Lemmatise Text?", on = T, 
                                 icon_info = "Lemmatisation is the process of grouping together different inflected forms of the same word e.g. 'girls' -> 'girl', 'walked' -> 'walk'."),
       shiny::conditionalPanel(
         condition = "input.lemmatise_text == 1", ns = ns,
@@ -164,7 +164,7 @@ saveButton_with_tooltip <- function(..., icon_info){
   )
 }
 
-input_switch_with_tooltop <- function(id, title, icon_info, on = TRUE){
+input_switch_with_tooltip <- function(id, title, icon_info, on = TRUE){
   shiny::div(
     style = "position: relative",
     bslib::input_switch(id, title, value = on),
