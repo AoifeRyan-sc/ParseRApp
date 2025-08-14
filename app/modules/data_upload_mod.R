@@ -1,3 +1,4 @@
+
 dataUploadUi <- function(id){
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -13,7 +14,7 @@ dataUploadUi <- function(id){
       ),
       shiny::br(),
       shiny::uiOutput(ns("change_columns_button"))
-  )
+    )
   )
 }
 
@@ -30,7 +31,7 @@ dataUploadServer <- function(id, r){
       clear_reactives(r)
       r$file_path <- input$file_upload$datapath
       load_data(r)
-     
+      
       if (nrow(r$master_df) > 50000){
         r$df <- NULL # and maybe close connection?
         
@@ -50,7 +51,7 @@ dataUploadServer <- function(id, r){
       } # what to do after data upload
       
     }) # deal with uploaded file
-  
+    
     # shiny::observeEvent(input$file_upload, {
     #   message("sapplying")
     #   col_factor <- sapply(r$df, detect_factor)
@@ -59,7 +60,7 @@ dataUploadServer <- function(id, r){
     #   r$df <- as.data.frame(df_mat)
     #   message("finished")
     # })
-
+    
     shiny::observeEvent(input$confirm_input_cols, { 
       
       if (shiny::isTruthy(input$text_column)){
@@ -71,31 +72,18 @@ dataUploadServer <- function(id, r){
         
         if (!tolower(r$text_var) %in% c("message", "text")){
           col_check(check_var = r$text_var, correct_var = "message", ns = ns)  
-        } 
-        # else if (isTruthy(r$sender_var) &!tolower(r$date_var) %in% c("screen_name", "screen name", "sender screen name", "sender_screen_name")){
-        #   col_check(check_var = r$sender_var, correct_var = "author", ns = ns)
-        # } else if (isTruthy(r$date_var) &!tolower(r$date_var) %in% c("date", "created time", "created_time", "createdtime")){
-        #   col_check(check_var = r$date_var, correct_var = "date", ns = ns)
-        # }
+        }
         
         else {
-          shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
-
-          df_clean <- process_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
-
-          make_duckdb(df = df_clean, con = r$con, name = "master_df")
-          r$df <- dplyr::tbl(r$con, "master_df")
-
-          shinybusy::remove_modal_spinner()
-          shiny::showNotification("Text cleaning completed!", type = "message")
+          r$df <- process_df(df = r$df, message_var = rlang::sym(r$text_var), con = r$con, df_con_name = "master_df", lemmatise = input$lemmatise_text, language = input$lemma_language, duckdb = T)
         }
-      
-        } else {
-
-          output$text_col_missing_error <- shiny::renderUI({
-            missing_input_error("missing-selection-error", "Please select a text column")
-          })
-        }
+        
+      } else {
+        
+        output$text_col_missing_error <- shiny::renderUI({
+          missing_input_error("missing-selection-error", "Please select a text column")
+        })
+      }
       
     }) # clean text - maybe need to change
     
@@ -106,15 +94,7 @@ dataUploadServer <- function(id, r){
       r$date_var <- input$date_column
       r$sender_var <- input$author_column
       
-      shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
-      
-      df_clean <- process_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
-      
-      make_duckdb(df = df_clean, con = r$con, name = "master_df")
-      r$df <- dplyr::tbl(r$con, "master_df")
-      
-      shinybusy::remove_modal_spinner()
-      shiny::showNotification("Text cleaning completed!", type = "message")
+      r$df <- process_df(df = r$df, message_var = rlang::sym(r$text_var), con = r$con, df_con_name = "master_df", lemmatise = input$lemmatise_text, language = input$lemma_language, duckdb = T)
     })
     
     shiny::observeEvent(input$reselect_var, {
@@ -127,7 +107,7 @@ dataUploadServer <- function(id, r){
                           "Change Column Selections",
                           icon = shiny::icon("arrow-rotate-right", lib = "font-awesome"),
                           # class = "btn-info"
-                          )
+      )
     })
     
     shiny::observeEvent(input$reset_columns, {
