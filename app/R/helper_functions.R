@@ -273,8 +273,12 @@ clean_df <- function(df, message_var, duckdb = F){
 
 lemmatise_df <- function(df, language = c("english", "spanish"), duckdb = F){
   
-  
-  model_dir <- paste0("models/", language, "-ewt-ud-2.5-191206.udpipe")
+  if (language == "english"){
+    start_model_path <- paste0("models/", language, "-ewt-")
+  } else {
+    start_model_path <- paste0("models/", language, "-gsd-")
+  }
+  model_dir <- paste0(start_model_path, "ud-2.5-191206.udpipe")
   
   model = udpipe::udpipe_load_model(model_dir)
   
