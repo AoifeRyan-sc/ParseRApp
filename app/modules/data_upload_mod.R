@@ -81,7 +81,7 @@ dataUploadServer <- function(id, r){
         else {
           shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
 
-          df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
+          df_clean <- process_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
 
           make_duckdb(df = df_clean, con = r$con, name = "master_df")
           r$df <- dplyr::tbl(r$con, "master_df")
@@ -108,7 +108,7 @@ dataUploadServer <- function(id, r){
       
       shinybusy::show_modal_spinner(text = "Cleaning text, please wait...", spin = "circle")
       
-      df_clean <- clean_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
+      df_clean <- process_df(df = r$df, message_var = rlang::sym(r$text_var), duckdb = T)
       
       make_duckdb(df = df_clean, con = r$con, name = "master_df")
       r$df <- dplyr::tbl(r$con, "master_df")
